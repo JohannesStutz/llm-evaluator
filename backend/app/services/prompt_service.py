@@ -1,7 +1,15 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from .. import models
 from .. import schemas
+
+# Try to import the llm library
+try:
+    import llm
+except ImportError:
+    llm = None
+    print("Warning: llm library not found. Templates will be handled manually.")
+
 
 class PromptService:
     def create_prompt(self, db: Session, prompt: schemas.PromptCreate) -> models.Prompt:
@@ -14,6 +22,24 @@ class PromptService:
         db.add(db_prompt)
         db.commit()
         db.refresh(db_prompt)
+        
+        # Optionally save as an llm template if library is available
+        if llm is not None:
+            try:
+                # Extract system prompt if it exists
+                if prompt.template.startswith("System:"):
+                    try:
+                        system_part, prompt_part = prompt.template.split("Prompt:", 1)
+                        system_prompt = system_part.replace("System:", "").strip()
+                        # Save as an llm template
+                        llm.set_alias(prompt.name.lower().replace(" ", "_"), 
+                                     {"system": system_prompt})
+                    except ValueError:
+                        # If splitting fails, don't create a system template
+                        pass
+            except Exception as e:
+                print(f"Could not save as llm template: {e}")
+        
         return db_prompt
     
     def get_prompt(self, db: Session, prompt_id: int) -> Optional[models.Prompt]:
@@ -43,3 +69,29 @@ class PromptService:
             db.commit()
             return True
         return False
+    
+    def format_prompt(self, template: str, input_text: str) -> Dict[str, Any]:
+        """Format a prompt template with input text
+        
+        Returns a dictionary with:
+        - prompt: The formatted prompt text
+        - system: Optional system prompt if specified
+        """
+        # Replace placeholder in template
+        prompt = template.replace("{{input}}", input_text)
+        
+        # Extract system prompt if specified
+        system = None
+        if prompt.startswith("System:"):
+            try:
+                system_part, prompt_part = prompt.split("Prompt:", 1)
+                system = system_part.replace("System:", "").strip()
+                prompt = prompt_part.strip()
+            except ValueError:
+                # If splitting fails, use the entire prompt
+                pass
+                
+        return {
+            "prompt": prompt,
+            "system": system
+        }

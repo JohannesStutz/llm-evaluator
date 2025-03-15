@@ -1,12 +1,18 @@
+import logging
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from .. import models
 from .. import schemas
 from .llm_service import LLMService
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class EvaluationService:
     def __init__(self, llm_service: LLMService):
         self.llm_service = llm_service
+        logger.info("EvaluationService initialized")
     
     def create_input(self, db: Session, input_data: schemas.InputCreate) -> models.Input:
         """Create a new input text"""
@@ -34,10 +40,45 @@ class EvaluationService:
     
     def get_models(self, db: Session, skip: int = 0, limit: int = 100) -> List[models.LLMModel]:
         """Get all models with pagination"""
+        # IMPORTANT FIX: First ensure LLM models are synchronized with the database
+        self.sync_models_with_db(db)
+        
         return db.query(models.LLMModel).offset(skip).limit(limit).all()
+    
+    def sync_models_with_db(self, db: Session) -> None:
+        """Synchronize models from LLMService with the database"""
+        logger.info("Synchronizing models with database")
+        
+        # Get models from LLMService
+        service_models = self.llm_service.get_available_models()
+        logger.info(f"Found {len(service_models)} models from LLMService")
+        
+        # Get existing models from database
+        db_models = db.query(models.LLMModel).all()
+        db_model_names = {model.name for model in db_models}
+        
+        # Add missing models to database
+        models_added = 0
+        for model_info in service_models:
+            if model_info["name"] not in db_model_names:
+                logger.info(f"Adding new model to database: {model_info['name']}")
+                db_model = models.LLMModel(
+                    name=model_info["name"],
+                    description=model_info["description"]
+                )
+                db.add(db_model)
+                models_added += 1
+        
+        if models_added > 0:
+            logger.info(f"Added {models_added} new models to database")
+            db.commit()
+        else:
+            logger.info("No new models to add to database")
     
     def process_text(self, db: Session, request: schemas.ProcessRequest) -> Dict[str, Any]:
         """Process a single text with multiple models and prompts"""
+        logger.info(f"Processing text with {len(request.model_ids)} models and {len(request.prompt_ids)} prompts")
+        
         # Create input
         db_input = models.Input(text=request.text)
         db.add(db_input)
@@ -50,33 +91,46 @@ class EvaluationService:
         for model_id in request.model_ids:
             db_model = self.get_model(db, model_id)
             if not db_model:
+                logger.warning(f"Model with ID {model_id} not found")
                 continue
                 
             for prompt_id in request.prompt_ids:
                 db_prompt = db.query(models.Prompt).filter(models.Prompt.id == prompt_id).first()
                 if not db_prompt:
+                    logger.warning(f"Prompt with ID {prompt_id} not found")
                     continue
                 
+                logger.info(f"Processing with model: {db_model.name}, prompt: {db_prompt.name}")
+                
                 # Process with the LLM service
-                output_data = self.llm_service.process_text(
-                    db_model.name,
-                    db_prompt.template,
-                    request.text
-                )
-                
-                # Create output record
-                db_output = models.Output(
-                    input_id=db_input.id,
-                    model_id=model_id,
-                    prompt_id=prompt_id,
-                    text=output_data["text"],
-                    processing_time=output_data["processing_time"]
-                )
-                db.add(db_output)
-                db.commit()
-                db.refresh(db_output)
-                
-                results.append(db_output)
+                try:
+                    output_data = self.llm_service.process_text(
+                        db_model.name,
+                        db_prompt.template,
+                        request.text
+                    )
+                    
+                    # Create output record
+                    db_output = models.Output(
+                        input_id=db_input.id,
+                        model_id=model_id,
+                        prompt_id=prompt_id,
+                        text=output_data["text"],
+                        processing_time=output_data["processing_time"]
+                    )
+                    db.add(db_output)
+                    db.commit()
+                    db.refresh(db_output)
+                    
+                    # Load relationships for the response
+                    db_output.model = db_model
+                    db_output.prompt = db_prompt
+                    db_output.input = db_input
+                    
+                    results.append(db_output)
+                    logger.info(f"Processing successful, output length: {len(output_data['text'])} chars")
+                except Exception as e:
+                    logger.exception(f"Error processing text: {e}")
         
         return {
             "input_id": db_input.id,
