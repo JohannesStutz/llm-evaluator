@@ -14,12 +14,13 @@
             <ul>
                 <li><a href="#" id="nav-input-sets" class="active">Input Sets</a></li>
                 <li><a href="#" id="nav-prompt-workshop">Prompt Workshop</a></li>
+                <li><a href="#" id="nav-batch-evaluation">Batch Evaluation</a></li>
                 <li><a href="#" id="nav-comparison">Comparison</a></li>
                 <li><a href="#" id="nav-history">History</a></li>
             </ul>
         </nav>
     </header>
-    
+
     <main>
         <div class="container">
             <div class="sidebar">
@@ -31,7 +32,7 @@
                     </div>
                     <button id="add-model-btn" class="btn">Add Model</button>
                 </section>
-                
+
                 <section class="prompts-section">
                     <h2>Prompts</h2>
                     <div class="prompt-list" id="prompt-list">
@@ -41,7 +42,7 @@
                     <button id="add-prompt-btn" class="btn">Add Prompt</button>
                 </section>
             </div>
-            
+
             <div class="content">
                 <!-- Input Sets View -->
                 <section id="input-sets-view" class="view active-view">
@@ -49,13 +50,13 @@
                         <h2>Input Sets</h2>
                         <button id="create-input-set-btn" class="btn primary">New Input Set</button>
                     </div>
-                    
+
                     <div class="input-sets-container">
                         <div class="input-sets-list" id="input-sets-list">
                             <!-- Input sets will be loaded here -->
                             <div class="loading">Loading input sets...</div>
                         </div>
-                        
+
                         <div class="input-set-detail" id="input-set-detail">
                             <div class="input-set-header">
                                 <h3 id="current-set-name">Select an Input Set</h3>
@@ -64,13 +65,13 @@
                                     <button id="delete-input-set-btn" class="btn" disabled>Delete</button>
                                 </div>
                             </div>
-                            
+
                             <div class="inputs-container">
                                 <div class="input-list" id="input-list">
                                     <!-- Inputs in the selected set will be loaded here -->
                                     <div class="no-inputs">No inputs in this set</div>
                                 </div>
-                                
+
                                 <div class="input-actions">
                                     <button id="add-input-btn" class="btn" disabled>Add Input</button>
                                 </div>
@@ -78,7 +79,7 @@
                         </div>
                     </div>
                 </section>
-                
+
                 <!-- Prompt Workshop View -->
                 <section id="prompt-workshop-view" class="view">
                     <div class="view-header">
@@ -88,7 +89,7 @@
                             <button id="duplicate-prompt-btn" class="btn">Duplicate</button>
                         </div>
                     </div>
-                    
+
                     <div class="prompt-editor">
                         <div class="prompt-select">
                             <select id="prompt-select">
@@ -96,7 +97,7 @@
                                 <!-- Prompts will be loaded here -->
                             </select>
                         </div>
-                        
+
                         <div class="prompt-editor-header">
                             <input type="text" id="prompt-name-input" placeholder="Prompt name..." disabled>
                             <div class="prompt-version-controls">
@@ -107,7 +108,7 @@
                                 <button id="new-version-btn" class="btn" disabled>New Version</button>
                             </div>
                         </div>
-                        
+
                         <div class="prompt-editor-body">
                             <textarea id="prompt-editor-textarea" rows="12" placeholder="Enter your prompt template..." disabled></textarea>
                             <div class="prompt-variables">
@@ -115,20 +116,83 @@
                                 <span class="variable-tag">{{input}}</span>
                             </div>
                         </div>
-                        
+
                         <div class="prompt-editor-footer">
                             <button id="save-prompt-btn" class="btn primary" disabled>Save</button>
                             <span id="save-status"></span>
                         </div>
                     </div>
                 </section>
-                
+
+                <!-- Batch Evaluation View -->
+                <section id="batch-evaluation-view" class="view">
+                    <div class="view-header">
+                        <h2>Batch Evaluation</h2>
+                    </div>
+
+                    <div class="batch-controls">
+                        <div class="control-group">
+                            <label for="batch-input-set">Input Set:</label>
+                            <select id="batch-input-set">
+                                <option value="">Select an Input Set</option>
+                                <!-- Input sets will be loaded here -->
+                            </select>
+                        </div>
+
+                        <div class="selected-items">
+                            <div class="selected-models">
+                                <h3>Selected Models</h3>
+                                <div id="selected-models-list" class="selected-list">
+                                    <div class="empty-selection">No models selected</div>
+                                </div>
+                            </div>
+
+                            <div class="selected-prompts">
+                                <h3>Selected Prompts</h3>
+                                <div id="selected-prompts-list" class="selected-list">
+                                    <div class="empty-selection">No prompts selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="batch-actions">
+                            <button id="run-batch-btn" class="btn primary">Run Batch Evaluation</button>
+                            <button id="export-results-btn" class="btn" disabled>Export Results</button>
+                        </div>
+                    </div>
+
+                    <div class="batch-results-container">
+                        <div class="batch-results-toolbar">
+                            <div class="batch-filter">
+                                <input type="text" id="batch-filter-input" placeholder="Filter results...">
+                            </div>
+                            <div class="batch-sort">
+                                <label for="batch-sort-select">Sort by:</label>
+                                <select id="batch-sort-select">
+                                    <option value="input">Input</option>
+                                    <option value="model">Model</option>
+                                    <option value="prompt">Prompt</option>
+                                    <option value="time">Processing Time</option>
+                                </select>
+                                <button id="batch-sort-direction" class="btn sort-btn">
+                                    <span class="sort-asc">↑</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="batch-results-grid" id="batch-results-grid">
+                            <!-- Batch results will be displayed here -->
+                            <div class="no-results">Run a batch evaluation to see results</div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Comparison View -->
                 <section id="comparison-view" class="view">
                     <div class="view-header">
                         <h2>Prompt Comparison</h2>
                     </div>
-                    
+
                     <div class="comparison-controls">
                         <div class="filter-controls">
                             <div class="filter-group">
@@ -138,7 +202,7 @@
                                     <!-- Input sets will be loaded here -->
                                 </select>
                             </div>
-                            
+
                             <div class="filter-group">
                                 <label for="input-filter">Input:</label>
                                 <select id="input-filter" disabled>
@@ -147,22 +211,22 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <button id="run-comparison-btn" class="btn primary">Run Comparison</button>
                     </div>
-                    
+
                     <div class="comparison-results" id="comparison-results">
                         <!-- Comparison results will be displayed here -->
                         <div class="no-results">Run a comparison to see results</div>
                     </div>
                 </section>
-                
+
                 <!-- History View -->
                 <section id="history-view" class="view">
                     <div class="view-header">
                         <h2>Result History</h2>
                     </div>
-                    
+
                     <div class="history-filters">
                         <div class="filter-group">
                             <label for="history-input-set-filter">Input Set:</label>
@@ -171,7 +235,7 @@
                                 <!-- Input sets will be loaded here -->
                             </select>
                         </div>
-                        
+
                         <div class="filter-group">
                             <label for="history-input-filter">Input:</label>
                             <select id="history-input-filter" disabled>
@@ -179,10 +243,10 @@
                                 <!-- Inputs will be loaded here -->
                             </select>
                         </div>
-                        
+
                         <button id="load-history-btn" class="btn">Load History</button>
                     </div>
-                    
+
                     <div class="history-results" id="history-results">
                         <!-- History results will be displayed here -->
                         <div class="no-results">Select an input to view its history</div>
@@ -191,7 +255,7 @@
             </div>
         </div>
     </main>
-    
+
     <!-- Modal templates -->
     <div id="modal-container" class="modal-container hidden">
         <div class="modal">
@@ -204,7 +268,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Templates -->
     <template id="model-item-template">
         <div class="model-item">
@@ -214,7 +278,7 @@
             </label>
         </div>
     </template>
-    
+
     <template id="prompt-item-template">
         <div class="prompt-item">
             <label>
@@ -227,7 +291,7 @@
             </div>
         </div>
     </template>
-    
+
     <template id="input-set-item-template">
         <div class="input-set-item">
             <div class="input-set-info">
@@ -239,7 +303,7 @@
             </div>
         </div>
     </template>
-    
+
     <template id="input-item-template">
         <div class="input-item">
             <div class="input-header">
@@ -252,7 +316,7 @@
             <p class="input-text"></p>
         </div>
     </template>
-    
+
     <template id="comparison-result-template">
         <div class="comparison-result">
             <div class="input-section">
@@ -264,12 +328,12 @@
             </div>
         </div>
     </template>
-    
+
     <template id="comparison-output-template">
         <div class="output-cell">
             <div class="output-header">
                 <div class="output-meta">
-                    <span class="model-name"></span> + 
+                    <span class="model-name"></span> +
                     <span class="prompt-name"></span>
                     <span class="processing-time"></span>
                 </div>
@@ -290,7 +354,59 @@
             </div>
         </div>
     </template>
-    
+
+    <template id="batch-result-row-template">
+        <div class="batch-result-row">
+            <div class="batch-input-cell">
+                <h4 class="input-name"></h4>
+                <p class="input-text"></p>
+            </div>
+            <div class="batch-result-cells">
+                <!-- Result cells will be inserted here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="batch-result-cell-template">
+        <div class="batch-result-cell">
+            <div class="cell-header">
+                <div class="cell-meta">
+                    <div class="model-prompt-info">
+                        <span class="model-name"></span> +
+                        <span class="prompt-name"></span>
+                    </div>
+                    <div class="cell-timestamp"></div>
+                    <div class="processing-time"></div>
+                </div>
+            </div>
+            <div class="cell-content">
+                <p class="output-text"></p>
+            </div>
+            <div class="cell-actions">
+                <button class="view-prompt-btn">View Prompt</button>
+                <div class="evaluation-controls">
+                    <button class="eval-btn bad" data-quality="bad">Bad</button>
+                    <button class="eval-btn ok" data-quality="ok">OK</button>
+                    <button class="eval-btn good" data-quality="good">Good</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="selected-model-template">
+        <div class="selected-item">
+            <span class="item-name"></span>
+            <button class="remove-item">×</button>
+        </div>
+    </template>
+
+    <template id="selected-prompt-template">
+        <div class="selected-item">
+            <span class="item-name"></span>
+            <button class="remove-item">×</button>
+        </div>
+    </template>
+
     <template id="history-result-template">
         <div class="history-result">
             <div class="history-header">
@@ -305,7 +421,7 @@
             </div>
         </div>
     </template>
-    
+
     <template id="create-input-set-template">
         <form id="create-input-set-form">
             <div class="form-group">
@@ -321,7 +437,7 @@
             </div>
         </form>
     </template>
-    
+
     <template id="create-input-template">
         <form id="create-input-form">
             <div class="form-group">
@@ -337,7 +453,7 @@
             </div>
         </form>
     </template>
-    
+
     <template id="create-prompt-template">
         <form id="create-prompt-form">
             <div class="form-group">
@@ -357,14 +473,17 @@
             </div>
         </form>
     </template>
-    
+
     <!-- Scripts -->
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/inputSets.js"></script>
     <script src="js/promptWorkshop.js"></script>
+    <script src="js/batchEvaluation.js"></script>
     <script src="js/comparison.js"></script>
     <script src="js/history.js"></script>
     <script src="js/app.js"></script>
+    <!-- Module initialization script - ensure this is loaded last -->
+    <script src="js/module-init.js"></script>
 </body>
 </html>

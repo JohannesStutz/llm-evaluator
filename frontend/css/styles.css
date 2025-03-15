@@ -655,28 +655,28 @@ h1, h2, h3, h4 {
     .container {
         flex-direction: column;
     }
-    
+
     .sidebar {
         width: 100%;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
     }
-    
+
     .input-sets-container {
         flex-direction: column;
     }
-    
+
     .input-sets-list {
         max-width: none;
         margin-bottom: 1rem;
     }
-    
+
     .comparison-controls,
     .history-filters {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .filter-controls {
         flex-direction: column;
     }
@@ -687,13 +687,324 @@ h1, h2, h3, h4 {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .prompt-version-controls {
         margin-top: 1rem;
     }
-    
+
     .output-grid,
     .history-outputs {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Batch Evaluation Styles - Add to styles.css */
+
+/* Batch Controls */
+.batch-controls {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.control-group {
+    margin-bottom: 1rem;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.control-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.selected-items {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.selected-models,
+.selected-prompts {
+    flex: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 1rem;
+}
+
+.selected-models h3,
+.selected-prompts h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--light-text);
+}
+
+.selected-list {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.empty-selection {
+    padding: 1rem;
+    color: var(--light-text);
+    font-style: italic;
+    text-align: center;
+}
+
+.selected-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: var(--light-bg);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.remove-item {
+    background: none;
+    border: none;
+    color: var(--light-text);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.remove-item:hover {
+    color: var(--error-color);
+}
+
+.batch-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+/* Batch Results */
+.batch-results-container {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+}
+
+.batch-results-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.batch-filter {
+    flex: 1;
+    max-width: 300px;
+}
+
+.batch-filter input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.batch-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.batch-sort select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.sort-btn {
+    padding: 0.5rem;
+    width: 36px;
+    height: 36px;
+}
+
+.sort-asc, .sort-desc {
+    font-weight: bold;
+}
+
+.sort-desc {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+/* Batch Results Grid */
+.batch-results-grid {
+    overflow-x: auto;
+}
+
+.batch-result-row {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.batch-input-cell {
+    min-width: 250px;
+    max-width: 300px;
+    padding: 1rem;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--light-bg);
+}
+
+.batch-input-cell .input-name {
+    margin-bottom: 0.5rem;
+}
+
+.batch-input-cell .input-text {
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.batch-result-cells {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.batch-result-cell {
+    min-width: 300px;
+    max-width: 350px;
+    margin-right: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+
+.cell-header {
+    padding: 0.75rem;
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cell-meta {
+    font-size: 0.9rem;
+}
+
+.model-prompt-info {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.cell-timestamp {
+    color: var(--light-text);
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.processing-time {
+    font-style: italic;
+    color: var(--light-text);
+    font-size: 0.8rem;
+}
+
+.cell-content {
+    padding: 1rem;
+    min-height: 150px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cell-actions {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    background-color: var(--light-bg);
+    border-top: 1px solid var(--border-color);
+}
+
+.cell-actions .view-prompt-btn {
+    margin-bottom: 0.75rem;
+    padding: 0.4rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.cell-actions .view-prompt-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.cell-actions .evaluation-controls {
+    display: flex;
+    justify-content: space-between;
+}
+
+.cell-actions .eval-btn {
+    flex: 1;
+    margin: 0 0.25rem;
+    padding: 0.4rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.cell-actions .eval-btn:first-child {
+    margin-left: 0;
+}
+
+.cell-actions .eval-btn:last-child {
+    margin-right: 0;
+}
+
+.cell-actions .eval-btn.bad {
+    background-color: var(--error-color);
+}
+
+.cell-actions .eval-btn.ok {
+    background-color: var(--ok-color);
+}
+
+.cell-actions .eval-btn.good {
+    background-color: var(--success-color);
+}
+
+.cell-actions .eval-btn.selected {
+    outline: 3px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 992px) {
+    .selected-items {
+        flex-direction: column;
+    }
+
+    .batch-results-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .batch-filter {
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    .batch-actions {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }

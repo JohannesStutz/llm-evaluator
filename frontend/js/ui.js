@@ -7,6 +7,7 @@ class UI {
         this.navLinks = {
             inputSets: document.getElementById('nav-input-sets'),
             promptWorkshop: document.getElementById('nav-prompt-workshop'),
+            batchEvaluation: document.getElementById('nav-batch-evaluation'),
             comparison: document.getElementById('nav-comparison'),
             history: document.getElementById('nav-history')
         };
@@ -15,6 +16,7 @@ class UI {
         this.views = {
             inputSets: document.getElementById('input-sets-view'),
             promptWorkshop: document.getElementById('prompt-workshop-view'),
+            batchEvaluation: document.getElementById('batch-evaluation-view'),
             comparison: document.getElementById('comparison-view'),
             history: document.getElementById('history-view')
         };
@@ -46,10 +48,12 @@ class UI {
     setupEventListeners() {
         // Navigation listeners
         for (const [key, link] of Object.entries(this.navLinks)) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.switchView(key);
-            });
+            if (link) {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchView(key);
+                });
+            }
         }
         
         // Add model button
@@ -78,19 +82,23 @@ class UI {
     switchView(viewName) {
         // Update navigation links
         for (const [key, link] of Object.entries(this.navLinks)) {
-            if (key === viewName) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
+            if (link) {
+                if (key === viewName) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
             }
         }
         
         // Update view containers
         for (const [key, view] of Object.entries(this.views)) {
-            if (key === viewName) {
-                view.classList.add('active-view');
-            } else {
-                view.classList.remove('active-view');
+            if (view) {
+                if (key === viewName) {
+                    view.classList.add('active-view');
+                } else {
+                    view.classList.remove('active-view');
+                }
             }
         }
         
@@ -101,6 +109,9 @@ class UI {
                 break;
             case 'promptWorkshop':
                 if (window.promptWorkshopUI) window.promptWorkshopUI.onViewActivated();
+                break;
+            case 'batchEvaluation':
+                if (window.batchEvaluationUI) window.batchEvaluationUI.onViewActivated();
                 break;
             case 'comparison':
                 if (window.comparisonUI) window.comparisonUI.onViewActivated();
@@ -241,6 +252,11 @@ class UI {
         checkbox.dataset.id = model.id;
         
         this.modelList.appendChild(modelItem);
+        
+        // If we have a batchEvaluationUI instance, update its checkbox listeners
+        if (window.batchEvaluationUI) {
+            window.batchEvaluationUI.setupCheckboxListeners();
+        }
     }
     
     /**
@@ -303,6 +319,11 @@ class UI {
         });
         
         this.promptList.appendChild(promptItem);
+        
+        // If we have a batchEvaluationUI instance, update its checkbox listeners
+        if (window.batchEvaluationUI) {
+            window.batchEvaluationUI.setupCheckboxListeners();
+        }
     }
     
     /**

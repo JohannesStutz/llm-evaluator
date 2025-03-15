@@ -306,6 +306,30 @@ class API {
     }
     
     /**
+     * Process multiple inputs with selected models and prompts
+     * This uses the compare-prompts endpoint for efficient batch processing
+     * 
+     * @param {Array<object>} inputs - Array of input objects with id property
+     * @param {Array<number>} modelIds - Selected model IDs
+     * @param {Array<number>} promptIds - Selected prompt IDs
+     * @param {object} promptVersionIds - Optional mapping of prompt ID to version ID
+     * @returns {Promise<Array>} - Array of processing results
+     */
+    async batchProcessInputs(inputs, modelIds, promptIds, promptVersionIds = null) {
+        // Extract input IDs from the input objects
+        const inputIds = inputs.map(input => input.id);
+        
+        console.log(`Batch processing ${inputIds.length} inputs with ${modelIds.length} models and ${promptIds.length} prompts`);
+        
+        return this.request('/compare-prompts/', 'POST', {
+            input_ids: inputIds,
+            model_ids: modelIds,
+            prompt_ids: promptIds,
+            prompt_version_ids: promptVersionIds
+        });
+    }
+    
+    /**
      * Compare multiple prompts on the same inputs
      * @param {Array<number>} inputIds - Input IDs
      * @param {Array<number>} promptIds - Prompt IDs

@@ -1,5 +1,7 @@
 # LLM Evaluator
 
+**Important: this is very much a work in progress as I'm experimenting with Claude for coding. I don't recommend using it yet.**
+
 A tool for evaluating local LLMs and different prompts for summarization and reformatting of transcribed voice memos.
 
 ## Features
