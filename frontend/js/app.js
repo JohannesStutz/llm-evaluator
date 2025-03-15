@@ -1,5 +1,5 @@
 /**
- * Main application for LLM Evaluator
+ * Main application for LLM Evaluator - Modified version
  */
 class App {
     constructor() {

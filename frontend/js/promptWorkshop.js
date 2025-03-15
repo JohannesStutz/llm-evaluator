@@ -13,8 +13,8 @@ class PromptWorkshopUI {
         // Action buttons
         this.newPromptBtn = document.getElementById('new-prompt-btn');
         this.duplicatePromptBtn = document.getElementById('duplicate-prompt-btn');
-        this.newVersionBtn = document.getElementById('new-version-btn');
         this.savePromptBtn = document.getElementById('save-prompt-btn');
+        this.deletePromptBtn = document.getElementById('delete-prompt-btn');
 
         // Templates
         this.createPromptTemplate = document.getElementById('create-prompt-template');
@@ -22,6 +22,7 @@ class PromptWorkshopUI {
         // State
         this.currentPromptId = null;
         this.currentVersionId = null;
+        this.currentPrompt = null;
         this.isEditing = false;
         this.prompts = [];
 
@@ -30,7 +31,7 @@ class PromptWorkshopUI {
     }
 
     /**
-     * Fixed setupEventListeners method for PromptWorkshopUI class to track input changes
+     * Setup event listeners for the prompt workshop
      */
     setupEventListeners() {
         // Prompt select
@@ -39,7 +40,7 @@ class PromptWorkshopUI {
             if (promptId) {
                 this.loadPrompt(promptId);
             } else {
-                this.resetEditor();
+                this.clearEditor();
             }
         });
 
@@ -57,18 +58,20 @@ class PromptWorkshopUI {
         // Duplicate prompt button
         this.duplicatePromptBtn.addEventListener('click', () => this.duplicateCurrentPrompt());
 
-        // New version button
-        this.newVersionBtn.addEventListener('click', () => this.createNewVersion());
+
 
         // Save prompt button
         this.savePromptBtn.addEventListener('click', () => this.savePrompt());
+
+        // Delete prompt button
+        this.deletePromptBtn.addEventListener('click', () => this.deleteCurrentPrompt());
 
         // Variable tag click
         document.querySelector('.variable-tag').addEventListener('click', () => {
             this.insertVariableTag('{{input}}');
         });
 
-        // ADDED: Listen for input events on the prompt editor
+        // Listen for input events on the prompt editor
         this.promptEditor.addEventListener('input', () => {
             this.isEditing = true;
             // Show unsaved changes indicator
@@ -129,7 +132,7 @@ class PromptWorkshopUI {
      */
     async loadPrompt(promptId) {
         try {
-            this.resetEditor();
+            this.clearEditor();
             this.currentPromptId = promptId;
 
             // Update prompt select
@@ -139,8 +142,8 @@ class PromptWorkshopUI {
             this.promptNameInput.disabled = true;
             this.promptVersionSelect.disabled = true;
             this.promptEditor.disabled = true;
-            this.newVersionBtn.disabled = true;
             this.savePromptBtn.disabled = true;
+            this.deletePromptBtn.disabled = true;
 
             // Set loading state
             this.promptNameInput.value = 'Loading...';
@@ -149,13 +152,15 @@ class PromptWorkshopUI {
 
             // Fetch the prompt with versions
             const prompt = await api.getPrompt(promptId);
+            this.currentPrompt = prompt;
 
             // Update name
             this.promptNameInput.value = prompt.name;
             this.promptNameInput.disabled = false;
 
-            // Enable duplicate button
+            // Enable buttons
             this.duplicatePromptBtn.disabled = false;
+            this.deletePromptBtn.disabled = false;
 
             // Populate versions
             this.promptVersionSelect.innerHTML = '';
@@ -179,12 +184,9 @@ class PromptWorkshopUI {
 
             // Load the latest version
             this.loadVersion(sortedVersions[0].id);
-
-            // Enable new version button
-            this.newVersionBtn.disabled = false;
         } catch (error) {
             console.error(`Error loading prompt ${promptId}:`, error);
-            this.resetEditor();
+            this.clearEditor();
             alert('Error loading prompt');
         }
     }
@@ -227,11 +229,12 @@ class PromptWorkshopUI {
     }
 
     /**
-     * Reset the editor
+     * Clear the editor
      */
-    resetEditor() {
+    clearEditor() {
         this.currentPromptId = null;
         this.currentVersionId = null;
+        this.currentPrompt = null;
         this.isEditing = false;
 
         this.promptNameInput.value = '';
@@ -244,8 +247,8 @@ class PromptWorkshopUI {
         this.promptEditor.disabled = true;
 
         this.duplicatePromptBtn.disabled = true;
-        this.newVersionBtn.disabled = true;
         this.savePromptBtn.disabled = true;
+        this.deletePromptBtn.disabled = true;
 
         this.saveStatus.textContent = '';
     }
@@ -269,7 +272,15 @@ class PromptWorkshopUI {
             try {
                 const prompt = await api.createPrompt(name, template, description);
                 ui.hideModal();
+                
+                // Refresh the workshop prompt list
                 this.loadPrompts();
+                
+                // Also refresh the sidebar prompt list
+                const prompts = await api.getPrompts();
+                ui.displayPrompts(prompts);
+                
+                // Load the newly created prompt
                 this.loadPrompt(prompt.id);
             } catch (error) {
                 alert(`Error creating prompt: ${error.message}`);
@@ -297,8 +308,14 @@ class PromptWorkshopUI {
                 prompt.description
             );
 
-            // Load the new prompt
+            // Refresh the workshop prompt list
             this.loadPrompts();
+            
+            // Also refresh the sidebar prompt list
+            const prompts = await api.getPrompts();
+            ui.displayPrompts(prompts);
+            
+            // Load the newly created prompt
             this.loadPrompt(newPrompt.id);
         } catch (error) {
             console.error('Error duplicating prompt:', error);
@@ -307,34 +324,43 @@ class PromptWorkshopUI {
     }
 
     /**
-     * Create a new version of the current prompt
+     * Delete the current prompt
      */
-    async createNewVersion() {
-        if (!this.currentPromptId) return;
-
-        try {
-            // Get the current template
-            const template = this.promptEditor.value;
-
-            // Create a new version
-            const version = await api.createPromptVersion(this.currentPromptId, template);
-
-            // Reload the prompt
-            this.loadPrompt(this.currentPromptId);
-
-            // Set the current version
-            setTimeout(() => {
-                this.promptVersionSelect.value = version.id;
-                this.loadVersion(version.id);
-            }, 100);
-        } catch (error) {
-            console.error('Error creating new version:', error);
-            alert('Error creating new version');
+    async deleteCurrentPrompt() {
+        if (!this.currentPrompt) {
+            return;
+        }
+        
+        const promptName = this.currentPrompt.name;
+        
+        if (confirm(`Are you sure you want to delete the prompt "${promptName}"?`)) {
+            try {
+                await api.deletePrompt(this.currentPrompt.id);
+                
+                // Clear the editor first
+                this.clearEditor();
+                
+                // Reload prompts
+                this.loadPrompts();
+                
+                // Also refresh the sidebar prompt list
+                const prompts = await api.getPrompts();
+                ui.displayPrompts(prompts);
+                
+                // Reset the prompt select to empty
+                this.promptSelect.value = '';
+                
+                alert(`Prompt "${promptName}" deleted successfully.`);
+            } catch (error) {
+                alert(`Error deleting prompt: ${error.message || 'Unknown error'}`);
+            }
         }
     }
 
+
+
     /**
-     * Modified savePrompt method with better error handling and debugging
+     * Save the current prompt
      */
     async savePrompt() {
         if (!this.currentPromptId) return;
@@ -372,7 +398,9 @@ class PromptWorkshopUI {
 
             this.saveStatus.textContent = 'Saved';
 
-            // Refresh the prompt list
+            // Refresh both the workshop prompt list and sidebar prompt list
+            const updatedPrompts = await api.getPrompts();
+            ui.displayPrompts(updatedPrompts);
             this.loadPrompts();
 
             // Clear saved message after a delay
@@ -406,6 +434,7 @@ class PromptWorkshopUI {
 
         // Set editing state
         this.isEditing = true;
+        this.saveStatus.textContent = 'Unsaved changes';
     }
 }
 

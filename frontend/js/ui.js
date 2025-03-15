@@ -1,5 +1,5 @@
 /**
- * UI interactions for the LLM Evaluator
+ * UI interactions for the LLM Evaluator - Modified version
  */
 class UI {
     constructor() {
@@ -25,6 +25,9 @@ class UI {
         this.modelList = document.getElementById('model-list');
         this.promptList = document.getElementById('prompt-list');
         
+        // Model filter
+        this.modelFilterInput = document.getElementById('model-filter-input');
+        
         // Templates
         this.modelItemTemplate = document.getElementById('model-item-template');
         this.promptItemTemplate = document.getElementById('prompt-item-template');
@@ -35,11 +38,13 @@ class UI {
         this.modalContent = document.getElementById('modal-content');
         
         // Action buttons
-        this.addModelBtn = document.getElementById('add-model-btn');
         this.addPromptBtn = document.getElementById('add-prompt-btn');
         
         // Setup event listeners
         this.setupEventListeners();
+        
+        // Initialize model filter with saved value (if any)
+        this.initializeModelFilter();
     }
     
     /**
@@ -56,11 +61,13 @@ class UI {
             }
         }
         
-        // Add model button
-        this.addModelBtn.addEventListener('click', () => this.showAddModelModal());
-        
         // Add prompt button
         this.addPromptBtn.addEventListener('click', () => this.showAddPromptModal());
+        
+        // Model filter input
+        if (this.modelFilterInput) {
+            this.modelFilterInput.addEventListener('input', () => this.filterModels());
+        }
         
         // Close modal button
         document.querySelector('.close-modal').addEventListener('click', () => {
@@ -71,6 +78,44 @@ class UI {
         this.modalContainer.addEventListener('click', (e) => {
             if (e.target === this.modalContainer) {
                 this.hideModal();
+            }
+        });
+    }
+    
+    /**
+     * Initialize the model filter with saved value
+     */
+    initializeModelFilter() {
+        if (this.modelFilterInput) {
+            // Try to load the saved filter value from localStorage
+            const savedFilter = localStorage.getItem('modelFilter');
+            if (savedFilter) {
+                this.modelFilterInput.value = savedFilter;
+                // Apply the filter after models are loaded
+                setTimeout(() => this.filterModels(), 500);
+            }
+        }
+    }
+    
+    /**
+     * Filter models based on input text
+     */
+    filterModels() {
+        const filterText = this.modelFilterInput.value.toLowerCase();
+        
+        // Save the filter text to localStorage
+        localStorage.setItem('modelFilter', filterText);
+        
+        // Get all model items
+        const modelItems = this.modelList.querySelectorAll('.model-item');
+        
+        // Filter models
+        modelItems.forEach(item => {
+            const modelName = item.querySelector('.model-name').textContent.toLowerCase();
+            if (modelName.includes(filterText)) {
+                item.classList.remove('filtered');
+            } else {
+                item.classList.add('filtered');
             }
         });
     }
@@ -142,55 +187,6 @@ class UI {
     }
     
     /**
-     * Show the add model modal
-     */
-    showAddModelModal() {
-        const template = document.getElementById('create-input-set-template');
-        const content = template.content.cloneNode(true);
-        
-        // Change form ID to match what we're actually doing
-        const form = content.querySelector('form');
-        form.id = 'add-model-form';
-        
-        // Change field IDs and labels
-        const nameLabel = content.querySelector('label[for="input-set-name"]');
-        nameLabel.textContent = 'Model Name:';
-        nameLabel.setAttribute('for', 'model-name');
-        
-        const nameInput = content.querySelector('#input-set-name');
-        nameInput.id = 'model-name';
-        
-        const descLabel = content.querySelector('label[for="input-set-description"]');
-        descLabel.textContent = 'Description (optional):';
-        descLabel.setAttribute('for', 'model-description');
-        
-        const descInput = content.querySelector('#input-set-description');
-        descInput.id = 'model-description';
-        
-        // Change submit button text
-        const submitBtn = content.querySelector('button[type="submit"]');
-        submitBtn.textContent = 'Add Model';
-        
-        this.showModal('Add Model', content);
-        
-        // Set up form submission
-        document.getElementById('add-model-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('model-name').value;
-            const description = document.getElementById('model-description').value;
-            
-            try {
-                const model = await api.createModel({ name, description });
-                this.addModelToList(model);
-                this.hideModal();
-            } catch (error) {
-                alert(`Error adding model: ${error.message}`);
-            }
-        });
-    }
-    
-    /**
      * Show the add prompt modal
      */
     showAddPromptModal() {
@@ -237,6 +233,9 @@ class UI {
         models.forEach(model => {
             this.addModelToList(model);
         });
+        
+        // Apply any saved filter
+        this.filterModels();
     }
     
     /**
@@ -285,7 +284,6 @@ class UI {
         const promptName = promptItem.querySelector('.prompt-name');
         const checkbox = promptItem.querySelector('.prompt-checkbox');
         const editBtn = promptItem.querySelector('.edit-prompt');
-        const deleteBtn = promptItem.querySelector('.delete-prompt');
         
         promptName.textContent = prompt.name;
         checkbox.dataset.id = prompt.id;
@@ -297,24 +295,6 @@ class UI {
             this.switchView('promptWorkshop');
             if (window.promptWorkshopUI) {
                 window.promptWorkshopUI.loadPrompt(prompt.id);
-            }
-        });
-        
-        // Set up delete button
-        deleteBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if (confirm(`Are you sure you want to delete the prompt "${prompt.name}"?`)) {
-                try {
-                    await api.deletePrompt(prompt.id);
-                    e.target.closest('.prompt-item').remove();
-                    
-                    // Refresh the prompt workshop if it's active
-                    if (window.promptWorkshopUI) {
-                        window.promptWorkshopUI.loadPrompts();
-                    }
-                } catch (error) {
-                    alert(`Error deleting prompt: ${error.message}`);
-                }
             }
         });
         

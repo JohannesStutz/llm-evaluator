@@ -26,11 +26,13 @@
             <div class="sidebar">
                 <section class="models-section">
                     <h2>Models</h2>
+                    <div class="model-filter">
+                        <input type="text" id="model-filter-input" placeholder="Filter models...">
+                    </div>
                     <div class="model-list" id="model-list">
                         <!-- Models will be loaded here -->
                         <div class="loading">Loading models...</div>
                     </div>
-                    <button id="add-model-btn" class="btn">Add Model</button>
                 </section>
 
                 <section class="prompts-section">
@@ -105,7 +107,6 @@
                                 <select id="prompt-version-select" disabled>
                                     <!-- Versions will be loaded here -->
                                 </select>
-                                <button id="new-version-btn" class="btn" disabled>New Version</button>
                             </div>
                         </div>
 
@@ -118,7 +119,10 @@
                         </div>
 
                         <div class="prompt-editor-footer">
-                            <button id="save-prompt-btn" class="btn primary" disabled>Save</button>
+                            <div class="prompt-actions">
+                                <button id="save-prompt-btn" class="btn primary" disabled>Save</button>
+                                <button id="delete-prompt-btn" class="btn" disabled>Delete</button>
+                            </div>
                             <span id="save-status"></span>
                         </div>
                     </div>
@@ -287,7 +291,6 @@
             </label>
             <div class="prompt-actions">
                 <button class="edit-prompt">Edit</button>
-                <button class="delete-prompt">Delete</button>
             </div>
         </div>
     </template>

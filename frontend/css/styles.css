@@ -1008,3 +1008,102 @@ h1, h2, h3, h4 {
         gap: 0.5rem;
     }
 }
+
+/* Model Filter Styles - Add to styles.css */
+.model-filter {
+    margin-bottom: 1rem;
+}
+
+.model-filter input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* Prompt editor action buttons */
+.prompt-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#delete-prompt-btn {
+    background-color: var(--error-color);
+    color: white;
+}
+
+/* Hide filtered models */
+.model-item.filtered {
+    display: none;
+}
+
+/* Dropdown/Select element improvements - Add to styles.css */
+
+/* Target all select elements to ensure consistent styling */
+select {
+    appearance: none;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    width: auto;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+select:hover {
+    border-color: var(--secondary-color);
+}
+
+select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+}
+
+select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--light-bg);
+}
+
+/* Specific adjustment for prompt select */
+#prompt-select {
+    width: 100%;
+    padding: 0.7rem 2rem 0.7rem 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+/* Version select improvements */
+.prompt-version-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.prompt-version-controls select {
+    min-width: 120px;
+}
+
+/* Filter select elements - make them match the filter inputs */
+.filter-group select {
+    padding: 0.75rem 2rem 0.75rem 0.75rem;
+    width: 100%;
+    min-width: 200px;
+}
+
+/* Form select elements */
+.form-group select {
+    width: 100%;
+    padding: 0.75rem 2rem 0.75rem 0.75rem;
+}
