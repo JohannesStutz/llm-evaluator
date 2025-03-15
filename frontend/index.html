@@ -9,7 +9,15 @@
 <body>
     <header>
         <h1>LLM Evaluator</h1>
-        <p>Evaluate local LLMs and prompts for summarization tasks</p>
+        <p>Evaluate and iterate on prompts for LLMs</p>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#" id="nav-input-sets" class="active">Input Sets</a></li>
+                <li><a href="#" id="nav-prompt-workshop">Prompt Workshop</a></li>
+                <li><a href="#" id="nav-comparison">Comparison</a></li>
+                <li><a href="#" id="nav-history">History</a></li>
+            </ul>
+        </nav>
     </header>
     
     <main>
@@ -35,37 +43,149 @@
             </div>
             
             <div class="content">
-                <section class="input-section">
-                    <h2>Input Text</h2>
-                    <div class="input-toggle">
-                        <button class="toggle-btn active" id="single-input">Single</button>
-                        <button class="toggle-btn" id="batch-input">Batch</button>
+                <!-- Input Sets View -->
+                <section id="input-sets-view" class="view active-view">
+                    <div class="view-header">
+                        <h2>Input Sets</h2>
+                        <button id="create-input-set-btn" class="btn primary">New Input Set</button>
                     </div>
                     
-                    <div id="single-input-container">
-                        <textarea id="input-text" rows="5" placeholder="Enter your transcribed voice memo here..."></textarea>
-                    </div>
-                    
-                    <div id="batch-input-container" class="hidden">
-                        <div class="batch-inputs" id="batch-inputs">
-                            <div class="batch-input">
-                                <textarea rows="3" placeholder="Enter text #1 here..."></textarea>
-                                <button class="remove-btn">×</button>
+                    <div class="input-sets-container">
+                        <div class="input-sets-list" id="input-sets-list">
+                            <!-- Input sets will be loaded here -->
+                            <div class="loading">Loading input sets...</div>
+                        </div>
+                        
+                        <div class="input-set-detail" id="input-set-detail">
+                            <div class="input-set-header">
+                                <h3 id="current-set-name">Select an Input Set</h3>
+                                <div class="input-set-actions">
+                                    <button id="edit-input-set-btn" class="btn" disabled>Edit</button>
+                                    <button id="delete-input-set-btn" class="btn" disabled>Delete</button>
+                                </div>
+                            </div>
+                            
+                            <div class="inputs-container">
+                                <div class="input-list" id="input-list">
+                                    <!-- Inputs in the selected set will be loaded here -->
+                                    <div class="no-inputs">No inputs in this set</div>
+                                </div>
+                                
+                                <div class="input-actions">
+                                    <button id="add-input-btn" class="btn" disabled>Add Input</button>
+                                </div>
                             </div>
                         </div>
-                        <button id="add-batch-input" class="btn">Add Input</button>
-                    </div>
-                    
-                    <div class="processing-controls">
-                        <button id="process-btn" class="btn primary">Process</button>
                     </div>
                 </section>
                 
-                <section class="results-section">
-                    <h2>Results</h2>
-                    <div id="results-container">
-                        <!-- Results will be displayed here -->
-                        <div class="no-results">Process some text to see results</div>
+                <!-- Prompt Workshop View -->
+                <section id="prompt-workshop-view" class="view">
+                    <div class="view-header">
+                        <h2>Prompt Workshop</h2>
+                        <div class="workshop-actions">
+                            <button id="new-prompt-btn" class="btn primary">New Prompt</button>
+                            <button id="duplicate-prompt-btn" class="btn">Duplicate</button>
+                        </div>
+                    </div>
+                    
+                    <div class="prompt-editor">
+                        <div class="prompt-select">
+                            <select id="prompt-select">
+                                <option value="">Select a prompt...</option>
+                                <!-- Prompts will be loaded here -->
+                            </select>
+                        </div>
+                        
+                        <div class="prompt-editor-header">
+                            <input type="text" id="prompt-name-input" placeholder="Prompt name..." disabled>
+                            <div class="prompt-version-controls">
+                                <label for="prompt-version-select">Version:</label>
+                                <select id="prompt-version-select" disabled>
+                                    <!-- Versions will be loaded here -->
+                                </select>
+                                <button id="new-version-btn" class="btn" disabled>New Version</button>
+                            </div>
+                        </div>
+                        
+                        <div class="prompt-editor-body">
+                            <textarea id="prompt-editor-textarea" rows="12" placeholder="Enter your prompt template..." disabled></textarea>
+                            <div class="prompt-variables">
+                                <label>Available Variables:</label>
+                                <span class="variable-tag">{{input}}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="prompt-editor-footer">
+                            <button id="save-prompt-btn" class="btn primary" disabled>Save</button>
+                            <span id="save-status"></span>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Comparison View -->
+                <section id="comparison-view" class="view">
+                    <div class="view-header">
+                        <h2>Prompt Comparison</h2>
+                    </div>
+                    
+                    <div class="comparison-controls">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <label for="input-set-filter">Input Set:</label>
+                                <select id="input-set-filter">
+                                    <option value="">All Input Sets</option>
+                                    <!-- Input sets will be loaded here -->
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="input-filter">Input:</label>
+                                <select id="input-filter" disabled>
+                                    <option value="">All Inputs</option>
+                                    <!-- Inputs will be loaded here -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button id="run-comparison-btn" class="btn primary">Run Comparison</button>
+                    </div>
+                    
+                    <div class="comparison-results" id="comparison-results">
+                        <!-- Comparison results will be displayed here -->
+                        <div class="no-results">Run a comparison to see results</div>
+                    </div>
+                </section>
+                
+                <!-- History View -->
+                <section id="history-view" class="view">
+                    <div class="view-header">
+                        <h2>Result History</h2>
+                    </div>
+                    
+                    <div class="history-filters">
+                        <div class="filter-group">
+                            <label for="history-input-set-filter">Input Set:</label>
+                            <select id="history-input-set-filter">
+                                <option value="">All Input Sets</option>
+                                <!-- Input sets will be loaded here -->
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="history-input-filter">Input:</label>
+                            <select id="history-input-filter" disabled>
+                                <option value="">Select Input</option>
+                                <!-- Inputs will be loaded here -->
+                            </select>
+                        </div>
+                        
+                        <button id="load-history-btn" class="btn">Load History</button>
+                    </div>
+                    
+                    <div class="history-results" id="history-results">
+                        <!-- History results will be displayed here -->
+                        <div class="no-results">Select an input to view its history</div>
                     </div>
                 </section>
             </div>
@@ -108,27 +228,53 @@
         </div>
     </template>
     
-    <template id="result-item-template">
-        <div class="result-item">
-            <div class="result-header">
-                <h3 class="input-title">Input Text</h3>
-            </div>
-            <div class="input-content">
-                <p class="input-text"></p>
-            </div>
-            <div class="outputs-container">
-                <!-- Outputs will be inserted here -->
+    <template id="input-set-item-template">
+        <div class="input-set-item">
+            <div class="input-set-info">
+                <h3 class="input-set-name"></h3>
+                <p class="input-set-description"></p>
+                <div class="input-set-meta">
+                    <span class="input-count"></span> inputs
+                </div>
             </div>
         </div>
     </template>
     
-    <template id="output-item-template">
-        <div class="output-item">
+    <template id="input-item-template">
+        <div class="input-item">
+            <div class="input-header">
+                <h4 class="input-name"></h4>
+                <div class="input-actions">
+                    <button class="edit-input-btn">Edit</button>
+                    <button class="delete-input-btn">Delete</button>
+                </div>
+            </div>
+            <p class="input-text"></p>
+        </div>
+    </template>
+    
+    <template id="comparison-result-template">
+        <div class="comparison-result">
+            <div class="input-section">
+                <h3 class="input-name"></h3>
+                <p class="input-text"></p>
+            </div>
+            <div class="output-grid">
+                <!-- Output items will be inserted here -->
+            </div>
+        </div>
+    </template>
+    
+    <template id="comparison-output-template">
+        <div class="output-cell">
             <div class="output-header">
                 <div class="output-meta">
                     <span class="model-name"></span> + 
                     <span class="prompt-name"></span>
                     <span class="processing-time"></span>
+                </div>
+                <div class="output-actions">
+                    <button class="view-prompt-btn">View Prompt</button>
                 </div>
             </div>
             <div class="output-content">
@@ -145,38 +291,69 @@
         </div>
     </template>
     
-    <template id="add-model-template">
-        <form id="add-model-form">
+    <template id="history-result-template">
+        <div class="history-result">
+            <div class="history-header">
+                <h3 class="input-name"></h3>
+                <p class="input-text"></p>
+            </div>
+            <div class="history-timeline">
+                <!-- Timeline items will be inserted here -->
+            </div>
+            <div class="history-outputs">
+                <!-- Output items will be inserted here -->
+            </div>
+        </div>
+    </template>
+    
+    <template id="create-input-set-template">
+        <form id="create-input-set-form">
             <div class="form-group">
-                <label for="model-name">Model Name:</label>
-                <input type="text" id="model-name" required>
+                <label for="input-set-name">Name:</label>
+                <input type="text" id="input-set-name" required>
             </div>
             <div class="form-group">
-                <label for="model-description">Description (optional):</label>
-                <textarea id="model-description"></textarea>
+                <label for="input-set-description">Description (optional):</label>
+                <textarea id="input-set-description"></textarea>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn primary">Add Model</button>
+                <button type="submit" class="btn primary">Create Input Set</button>
             </div>
         </form>
     </template>
     
-    <template id="add-prompt-template">
-        <form id="add-prompt-form">
+    <template id="create-input-template">
+        <form id="create-input-form">
             <div class="form-group">
-                <label for="prompt-name">Prompt Name:</label>
-                <input type="text" id="prompt-name" required>
+                <label for="input-name">Name (optional):</label>
+                <input type="text" id="input-name">
             </div>
             <div class="form-group">
-                <label for="prompt-template">Template (use {{input}} as placeholder):</label>
-                <textarea id="prompt-template" required rows="5"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="prompt-description">Description (optional):</label>
-                <textarea id="prompt-description"></textarea>
+                <label for="input-text">Text:</label>
+                <textarea id="input-text" rows="6" required></textarea>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn primary">Save Prompt</button>
+                <button type="submit" class="btn primary">Add Input</button>
+            </div>
+        </form>
+    </template>
+    
+    <template id="create-prompt-template">
+        <form id="create-prompt-form">
+            <div class="form-group">
+                <label for="new-prompt-name">Name:</label>
+                <input type="text" id="new-prompt-name" required>
+            </div>
+            <div class="form-group">
+                <label for="new-prompt-description">Description (optional):</label>
+                <textarea id="new-prompt-description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="new-prompt-template">Template (use {{input}} as placeholder):</label>
+                <textarea id="new-prompt-template" rows="6" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn primary">Create Prompt</button>
             </div>
         </form>
     </template>
@@ -184,6 +361,10 @@
     <!-- Scripts -->
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/inputSets.js"></script>
+    <script src="js/promptWorkshop.js"></script>
+    <script src="js/comparison.js"></script>
+    <script src="js/history.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

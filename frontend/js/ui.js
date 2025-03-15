@@ -3,36 +3,38 @@
  */
 class UI {
     constructor() {
+        // Nav elements
+        this.navLinks = {
+            inputSets: document.getElementById('nav-input-sets'),
+            promptWorkshop: document.getElementById('nav-prompt-workshop'),
+            comparison: document.getElementById('nav-comparison'),
+            history: document.getElementById('nav-history')
+        };
+        
+        // View containers
+        this.views = {
+            inputSets: document.getElementById('input-sets-view'),
+            promptWorkshop: document.getElementById('prompt-workshop-view'),
+            comparison: document.getElementById('comparison-view'),
+            history: document.getElementById('history-view')
+        };
+        
         // Main containers
         this.modelList = document.getElementById('model-list');
         this.promptList = document.getElementById('prompt-list');
-        this.resultsContainer = document.getElementById('results-container');
-        this.batchInputsContainer = document.getElementById('batch-inputs');
         
         // Templates
         this.modelItemTemplate = document.getElementById('model-item-template');
         this.promptItemTemplate = document.getElementById('prompt-item-template');
-        this.resultItemTemplate = document.getElementById('result-item-template');
-        this.outputItemTemplate = document.getElementById('output-item-template');
-        this.addModelTemplate = document.getElementById('add-model-template');
-        this.addPromptTemplate = document.getElementById('add-prompt-template');
         
         // Modal
         this.modalContainer = document.getElementById('modal-container');
         this.modalTitle = document.getElementById('modal-title');
         this.modalContent = document.getElementById('modal-content');
         
-        // Input toggle buttons
-        this.singleInputBtn = document.getElementById('single-input');
-        this.batchInputBtn = document.getElementById('batch-input');
-        this.singleInputContainer = document.getElementById('single-input-container');
-        this.batchInputContainer = document.getElementById('batch-input-container');
-        
         // Action buttons
-        this.processBtn = document.getElementById('process-btn');
         this.addModelBtn = document.getElementById('add-model-btn');
         this.addPromptBtn = document.getElementById('add-prompt-btn');
-        this.addBatchInputBtn = document.getElementById('add-batch-input');
         
         // Setup event listeners
         this.setupEventListeners();
@@ -42,21 +44,19 @@ class UI {
      * Set up event listeners
      */
     setupEventListeners() {
-        // Input toggle
-        this.singleInputBtn.addEventListener('click', () => this.toggleInputMode('single'));
-        this.batchInputBtn.addEventListener('click', () => this.toggleInputMode('batch'));
-        
-        // Process button
-        this.processBtn.addEventListener('click', () => this.onProcessClick());
+        // Navigation listeners
+        for (const [key, link] of Object.entries(this.navLinks)) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchView(key);
+            });
+        }
         
         // Add model button
         this.addModelBtn.addEventListener('click', () => this.showAddModelModal());
         
         // Add prompt button
         this.addPromptBtn.addEventListener('click', () => this.showAddPromptModal());
-        
-        // Add batch input button
-        this.addBatchInputBtn.addEventListener('click', () => this.addBatchInput());
         
         // Close modal button
         document.querySelector('.close-modal').addEventListener('click', () => {
@@ -72,20 +72,42 @@ class UI {
     }
     
     /**
-     * Toggle between single and batch input modes
-     * @param {string} mode - Input mode ('single' or 'batch')
+     * Switch between views
+     * @param {string} viewName - Name of the view to switch to
      */
-    toggleInputMode(mode) {
-        if (mode === 'single') {
-            this.singleInputBtn.classList.add('active');
-            this.batchInputBtn.classList.remove('active');
-            this.singleInputContainer.classList.remove('hidden');
-            this.batchInputContainer.classList.add('hidden');
-        } else {
-            this.singleInputBtn.classList.remove('active');
-            this.batchInputBtn.classList.add('active');
-            this.singleInputContainer.classList.add('hidden');
-            this.batchInputContainer.classList.remove('hidden');
+    switchView(viewName) {
+        // Update navigation links
+        for (const [key, link] of Object.entries(this.navLinks)) {
+            if (key === viewName) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        }
+        
+        // Update view containers
+        for (const [key, view] of Object.entries(this.views)) {
+            if (key === viewName) {
+                view.classList.add('active-view');
+            } else {
+                view.classList.remove('active-view');
+            }
+        }
+        
+        // Trigger view-specific initialization if needed
+        switch (viewName) {
+            case 'inputSets':
+                if (window.inputSetsUI) window.inputSetsUI.onViewActivated();
+                break;
+            case 'promptWorkshop':
+                if (window.promptWorkshopUI) window.promptWorkshopUI.onViewActivated();
+                break;
+            case 'comparison':
+                if (window.comparisonUI) window.comparisonUI.onViewActivated();
+                break;
+            case 'history':
+                if (window.historyUI) window.historyUI.onViewActivated();
+                break;
         }
     }
     
@@ -112,7 +134,31 @@ class UI {
      * Show the add model modal
      */
     showAddModelModal() {
-        const content = this.addModelTemplate.content.cloneNode(true);
+        const template = document.getElementById('create-input-set-template');
+        const content = template.content.cloneNode(true);
+        
+        // Change form ID to match what we're actually doing
+        const form = content.querySelector('form');
+        form.id = 'add-model-form';
+        
+        // Change field IDs and labels
+        const nameLabel = content.querySelector('label[for="input-set-name"]');
+        nameLabel.textContent = 'Model Name:';
+        nameLabel.setAttribute('for', 'model-name');
+        
+        const nameInput = content.querySelector('#input-set-name');
+        nameInput.id = 'model-name';
+        
+        const descLabel = content.querySelector('label[for="input-set-description"]');
+        descLabel.textContent = 'Description (optional):';
+        descLabel.setAttribute('for', 'model-description');
+        
+        const descInput = content.querySelector('#input-set-description');
+        descInput.id = 'model-description';
+        
+        // Change submit button text
+        const submitBtn = content.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Add Model';
         
         this.showModal('Add Model', content);
         
@@ -134,42 +180,33 @@ class UI {
     }
     
     /**
-     * Show the add/edit prompt modal
-     * @param {object} promptData - Prompt data for editing (null for new prompt)
+     * Show the add prompt modal
      */
-    showAddPromptModal(promptData = null) {
-        const content = this.addPromptTemplate.content.cloneNode(true);
-        const isEdit = !!promptData;
+    showAddPromptModal() {
+        const template = document.getElementById('create-prompt-template');
+        const content = template.content.cloneNode(true);
         
-        // Set modal title based on whether we're editing or adding
-        this.showModal(isEdit ? 'Edit Prompt' : 'Add Prompt', content);
-        
-        // Fill form if editing
-        if (isEdit) {
-            document.getElementById('prompt-name').value = promptData.name;
-            document.getElementById('prompt-template').value = promptData.template;
-            document.getElementById('prompt-description').value = promptData.description || '';
-        }
+        this.showModal('Add Prompt', content);
         
         // Set up form submission
-        document.getElementById('add-prompt-form').addEventListener('submit', async (e) => {
+        document.getElementById('create-prompt-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('prompt-name').value;
-            const template = document.getElementById('prompt-template').value;
-            const description = document.getElementById('prompt-description').value;
+            const name = document.getElementById('new-prompt-name').value;
+            const template = document.getElementById('new-prompt-template').value;
+            const description = document.getElementById('new-prompt-description').value;
             
             try {
-                if (isEdit) {
-                    const prompt = await api.updatePrompt(promptData.id, { name, template, description });
-                    this.updatePromptInList(prompt);
-                } else {
-                    const prompt = await api.createPrompt({ name, template, description });
-                    this.addPromptToList(prompt);
-                }
+                const prompt = await api.createPrompt(name, template, description);
+                this.addPromptToList(prompt);
                 this.hideModal();
+                
+                // Refresh the prompt workshop if it's active
+                if (window.promptWorkshopUI) {
+                    window.promptWorkshopUI.loadPrompts();
+                }
             } catch (error) {
-                alert(`Error ${isEdit ? 'updating' : 'adding'} prompt: ${error.message}`);
+                alert(`Error adding prompt: ${error.message}`);
             }
         });
     }
@@ -240,7 +277,11 @@ class UI {
         // Set up edit button
         editBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.showAddPromptModal(prompt);
+            // Switch to prompt workshop and load this prompt
+            this.switchView('promptWorkshop');
+            if (window.promptWorkshopUI) {
+                window.promptWorkshopUI.loadPrompt(prompt.id);
+            }
         });
         
         // Set up delete button
@@ -250,6 +291,11 @@ class UI {
                 try {
                     await api.deletePrompt(prompt.id);
                     e.target.closest('.prompt-item').remove();
+                    
+                    // Refresh the prompt workshop if it's active
+                    if (window.promptWorkshopUI) {
+                        window.promptWorkshopUI.loadPrompts();
+                    }
                 } catch (error) {
                     alert(`Error deleting prompt: ${error.message}`);
                 }
@@ -260,199 +306,60 @@ class UI {
     }
     
     /**
-     * Update a prompt in the prompt list
-     * @param {object} prompt - Updated prompt data
+     * Show a loading indicator in a container
+     * @param {HTMLElement} container - Container element
+     * @param {string} message - Loading message
      */
-    updatePromptInList(prompt) {
-        const promptItems = this.promptList.querySelectorAll('.prompt-item');
-        
-        for (const item of promptItems) {
-            const checkbox = item.querySelector('.prompt-checkbox');
-            
-            if (checkbox.dataset.id == prompt.id) {
-                const promptName = item.querySelector('.prompt-name');
-                promptName.textContent = prompt.name;
-                return;
-            }
-        }
+    showLoading(container, message = 'Loading...') {
+        container.innerHTML = `<div class="loading">${message}</div>`;
     }
     
     /**
-     * Add a new batch input field
+     * Show an error message in a container
+     * @param {HTMLElement} container - Container element
+     * @param {string} message - Error message
      */
-    addBatchInput() {
-        const batchInput = document.createElement('div');
-        batchInput.className = 'batch-input';
-        
-        batchInput.innerHTML = `
-            <textarea rows="3" placeholder="Enter text here..."></textarea>
-            <button class="remove-btn">×</button>
-        `;
-        
-        // Set up remove button
-        batchInput.querySelector('.remove-btn').addEventListener('click', () => {
-            batchInput.remove();
-        });
-        
-        this.batchInputsContainer.appendChild(batchInput);
+    showError(container, message) {
+        container.innerHTML = `<div class="error">${message}</div>`;
     }
     
     /**
-     * Handle process button click
+     * Show a message indicating no items are available
+     * @param {HTMLElement} container - Container element
+     * @param {string} message - Message to display
      */
-    onProcessClick() {
-        // Get selected models
-        const selectedModelIds = Array.from(this.modelList.querySelectorAll('.model-checkbox:checked'))
-            .map(checkbox => parseInt(checkbox.dataset.id));
-        
-        // Get selected prompts
-        const selectedPromptIds = Array.from(this.promptList.querySelectorAll('.prompt-checkbox:checked'))
-            .map(checkbox => parseInt(checkbox.dataset.id));
-        
-        // Validate selections
-        if (selectedModelIds.length === 0) {
-            alert('Please select at least one model');
-            return;
-        }
-        
-        if (selectedPromptIds.length === 0) {
-            alert('Please select at least one prompt');
-            return;
-        }
-        
-        // Check active input mode
-        const isBatchMode = this.batchInputBtn.classList.contains('active');
-        
-        if (isBatchMode) {
-            // Get batch input texts
-            const batchTexts = Array.from(this.batchInputsContainer.querySelectorAll('textarea'))
-                .map(textarea => textarea.value.trim())
-                .filter(text => text !== '');
-            
-            if (batchTexts.length === 0) {
-                alert('Please enter at least one text');
-                return;
-            }
-            
-            // Process batch
-            this.processBatchTexts(batchTexts, selectedModelIds, selectedPromptIds);
-        } else {
-            // Get single input text
-            const inputText = document.getElementById('input-text').value.trim();
-            
-            if (!inputText) {
-                alert('Please enter some text');
-                return;
-            }
-            
-            // Process single text
-            this.processSingleText(inputText, selectedModelIds, selectedPromptIds);
-        }
+    showNoItems(container, message) {
+        container.innerHTML = `<div class="no-items">${message}</div>`;
     }
     
     /**
-     * Process a single text
-     * @param {string} text - Input text
-     * @param {Array<number>} modelIds - Selected model IDs
-     * @param {Array<number>} promptIds - Selected prompt IDs
+     * Format a date for display
+     * @param {string} dateStr - Date string
+     * @returns {string} - Formatted date string
      */
-    async processSingleText(text, modelIds, promptIds) {
-        try {
-            this.processBtn.disabled = true;
-            this.processBtn.textContent = 'Processing...';
-            
-            const result = await api.processText(text, modelIds, promptIds);
-            
-            // Clear results if this is the first result
-            if (this.resultsContainer.querySelector('.no-results')) {
-                this.resultsContainer.innerHTML = '';
-            }
-            
-            this.displayResult(result);
-        } catch (error) {
-            alert(`Error processing text: ${error.message}`);
-        } finally {
-            this.processBtn.disabled = false;
-            this.processBtn.textContent = 'Process';
-        }
+    formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleString();
     }
     
     /**
-     * Process multiple texts
-     * @param {Array<string>} texts - Input texts
-     * @param {Array<number>} modelIds - Selected model IDs
-     * @param {Array<number>} promptIds - Selected prompt IDs
+     * Format processing time for display
+     * @param {number} seconds - Processing time in seconds
+     * @returns {string} - Formatted processing time
      */
-    async processBatchTexts(texts, modelIds, promptIds) {
-        try {
-            this.processBtn.disabled = true;
-            this.processBtn.textContent = 'Processing Batch...';
-            
-            const results = await api.batchProcess(texts, modelIds, promptIds);
-            
-            // Clear results
-            this.resultsContainer.innerHTML = '';
-            
-            // Display each result
-            results.forEach(result => {
-                this.displayResult(result);
-            });
-        } catch (error) {
-            alert(`Error processing batch: ${error.message}`);
-        } finally {
-            this.processBtn.disabled = false;
-            this.processBtn.textContent = 'Process';
-        }
+    formatProcessingTime(seconds) {
+        return `${seconds.toFixed(2)}s`;
     }
     
     /**
-     * Display a processing result
-     * @param {object} result - Processing result
+     * Create a confirmation dialog
+     * @param {string} message - Confirmation message
+     * @returns {boolean} - True if confirmed, false otherwise
      */
-    displayResult(result) {
-        const resultItem = this.resultItemTemplate.content.cloneNode(true);
-        const inputText = resultItem.querySelector('.input-text');
-        const outputsContainer = resultItem.querySelector('.outputs-container');
-        
-        // Set input text
-        const input = result.results[0].input;
-        inputText.textContent = input.text;
-        
-        // Add each output
-        result.results.forEach(output => {
-            const outputItem = this.outputItemTemplate.content.cloneNode(true);
-            
-            // Set output content
-            outputItem.querySelector('.model-name').textContent = output.model.name;
-            outputItem.querySelector('.prompt-name').textContent = output.prompt.name;
-            outputItem.querySelector('.processing-time').textContent = `(${output.processing_time.toFixed(2)}s)`;
-            outputItem.querySelector('.output-text').textContent = output.text;
-            
-            // Set up evaluation buttons
-            const evalButtons = outputItem.querySelectorAll('.eval-btn');
-            evalButtons.forEach(button => {
-                button.addEventListener('click', async () => {
-                    const quality = button.dataset.quality;
-                    const notes = button.closest('.evaluation-controls').querySelector('textarea').value;
-                    
-                    try {
-                        await api.createEvaluation(output.id, quality, notes);
-                        
-                        // Reset all buttons
-                        evalButtons.forEach(btn => btn.classList.remove('selected'));
-                        
-                        // Select current button
-                        button.classList.add('selected');
-                    } catch (error) {
-                        alert(`Error saving evaluation: ${error.message}`);
-                    }
-                });
-            });
-            
-            outputsContainer.appendChild(outputItem);
-        });
-        
-        // Add result to container (prepend to show newest first)
-        this.resultsContainer.prepend(resultItem);
+    confirm(message) {
+        return window.confirm(message);
     }
 }
+
+// Create UI instance
+const ui = new UI();
