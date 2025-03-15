@@ -1,0 +1,23 @@
+llm-evaluator/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py              # FastAPI application
+│   │   ├── models.py            # Database models
+│   │   ├── schemas.py           # Pydantic schemas
+│   │   ├── database.py          # Database connection
+│   │   └── services/
+│   │       ├── __init__.py
+│   │       ├── llm_service.py   # Interface with the `llm` library
+│   │       ├── prompt_service.py # Manage prompts
+│   │       └── evaluation_service.py # Handle evaluations
+│   └── requirements.txt
+├── frontend/
+│   ├── index.html               # Main application HTML
+│   ├── css/
+│   │   └── styles.css           # Styling
+│   └── js/
+│       ├── app.js               # Application initialization
+│       ├── api.js               # API client
+│       └── ui.js                # UI interactions
+└── README.md

@@ -4,4 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi==0.95.1",
+    "llm>=0.22",
+    "pydantic==1.10.8",
+    "python-multipart==0.0.6",
+    "sqlalchemy==2.0.15",
+    "uvicorn==0.22.0",
+]
