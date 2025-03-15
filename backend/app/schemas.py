@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Union
 from datetime import datetime
 from enum import Enum
@@ -19,8 +19,7 @@ class Input(InputBase):
     id: int
     created_at: datetime
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 # Model schemas
 class LLMModelBase(BaseModel):
@@ -33,8 +32,7 @@ class LLMModelCreate(LLMModelBase):
 class LLMModel(LLMModelBase):
     id: int
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 # Prompt schemas
 class PromptBase(BaseModel):
@@ -48,8 +46,7 @@ class PromptCreate(PromptBase):
 class Prompt(PromptBase):
     id: int
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 # Output schemas
 class OutputBase(BaseModel):
@@ -68,8 +65,7 @@ class Output(OutputBase):
     prompt_id: int
     created_at: datetime
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 # Evaluation schemas
 class EvaluationBase(BaseModel):
@@ -84,8 +80,7 @@ class Evaluation(EvaluationBase):
     output_id: int
     created_at: datetime
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 # For LLM processing
 class ProcessRequest(BaseModel):

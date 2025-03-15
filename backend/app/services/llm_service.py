@@ -1,6 +1,13 @@
 import time
 from typing import List, Dict, Any, Optional
-import llm  # The library you mentioned
+
+# Note: You might need to install the llm library
+# If llm import fails, we'll use a dummy implementation
+try:
+    import llm  # The library mentioned in your dependencies
+except ImportError:
+    llm = None
+    print("Warning: llm library not found. Using dummy implementations.")
 
 class LLMService:
     def __init__(self):
@@ -10,6 +17,9 @@ class LLMService:
     def _load_available_models(self):
         """Load all available models from the llm library"""
         try:
+            if llm is None:
+                raise ImportError("llm library not installed")
+                
             # This will need to be adjusted based on the actual llm library API
             available_models = llm.get_installed_models()
             for model in available_models:

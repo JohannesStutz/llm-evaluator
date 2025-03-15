@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-import models
-import schemas
+from .. import models
+from .. import schemas
 
 class PromptService:
     def create_prompt(self, db: Session, prompt: schemas.PromptCreate) -> models.Prompt:

@@ -1,8 +1,8 @@
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
-import models
-import schemas
-from services.llm_service import LLMService
+from .. import models
+from .. import schemas
+from .llm_service import LLMService
 
 class EvaluationService:
     def __init__(self, llm_service: LLMService):

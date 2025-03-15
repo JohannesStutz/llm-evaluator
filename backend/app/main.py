@@ -3,12 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
 
-import models
-import schemas
-from database import engine, get_db
-from services.llm_service import LLMService
-from services.prompt_service import PromptService
-from services.evaluation_service import EvaluationService
+# Update imports to use relative imports
+from .database import engine, get_db
+from . import models
+from . import schemas
+from .services.llm_service import LLMService
+from .services.prompt_service import PromptService
+from .services.evaluation_service import EvaluationService
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)

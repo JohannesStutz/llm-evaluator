@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTim
 from sqlalchemy.orm import relationship
 import datetime
 import enum
-from database import Base
+from .database import Base
 
 class QualityRating(enum.Enum):
     BAD = "bad"
