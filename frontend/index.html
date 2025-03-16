@@ -230,33 +230,47 @@
                 <!-- History View -->
                 <section id="history-view" class="view">
                     <div class="view-header">
-                        <h2>Result History</h2>
-                    </div>
+                        <h2>Evaluation History</h2>
+                        <button id="history-view-toggle" class="btn">Switch to Timeline View</button>
+                      </div>
 
-                    <div class="history-filters">
-                        <div class="filter-group">
-                            <label for="history-input-set-filter">Input Set:</label>
-                            <select id="history-input-set-filter">
-                                <option value="">All Input Sets</option>
-                                <!-- Input sets will be loaded here -->
-                            </select>
+                      <div class="history-filters">
+                        <div class="inline-filter-group">
+                          <label for="history-input-set-filter">Input Set:</label>
+                          <select id="history-input-set-filter">
+                            <option value="">Select Input Set</option>
+                          </select>
                         </div>
-
-                        <div class="filter-group">
-                            <label for="history-input-filter">Input:</label>
-                            <select id="history-input-filter" disabled>
-                                <option value="">Select Input</option>
-                                <!-- Inputs will be loaded here -->
-                            </select>
+                        <div class="inline-filter-group">
+                          <label for="history-input-filter">Input:</label>
+                          <select id="history-input-filter" disabled>
+                            <option value="">Select Input</option>
+                          </select>
                         </div>
+                        <button id="load-history-btn" class="btn primary">Load History</button>
+                      </div>
 
-                        <button id="load-history-btn" class="btn">Load History</button>
-                    </div>
+                    <!-- New Matrix Filters - Initially Hidden -->
+                    <div class="matrix-filters">
+                        <div class="inline-filter-group">
+                          <label for="history-model-filter">Filter Model:</label>
+                          <select id="history-model-filter">
+                            <option value="">All Models</option>
+                          </select>
+                        </div>
+                        <div class="inline-filter-group">
+                          <label for="history-prompt-filter">Filter Prompt:</label>
+                          <select id="history-prompt-filter">
+                            <option value="">All Prompts</option>
+                          </select>
+                        </div>
+                      </div>
 
-                    <div class="history-results" id="history-results">
-                        <!-- History results will be displayed here -->
-                        <div class="no-results">Select an input to view its history</div>
-                    </div>
+                    <!-- Original Timeline Results Container -->
+                    <div id="history-results" class="history-results hidden"></div>
+
+                    <!-- New Matrix Results Container - Initially Hidden -->
+                    <div id="history-matrix" class="history-matrix"></div>
                 </section>
             </div>
         </div>
@@ -386,6 +400,38 @@
             <div class="history-outputs">
                 <!-- Output items will be inserted here -->
             </div>
+        </div>
+    </template>
+
+    <!-- Matrix View Template -->
+    <template id="matrix-view-template">
+        <div class="matrix-wrapper">
+        <table class="matrix-table">
+            <thead>
+            <tr class="matrix-header-row">
+                <th class="matrix-corner-cell">Model \ Prompt</th>
+                <!-- Prompt headers will be added dynamically -->
+            </tr>
+            </thead>
+            <tbody class="matrix-body">
+            <!-- Rows will be added dynamically -->
+            </tbody>
+        </table>
+        </div>
+    </template>
+
+    <!-- Streamlined Result Cell Template -->
+    <template id="streamlined-result-template">
+        <div class="streamlined-result">
+        <div class="streamlined-content"></div>
+        <div class="streamlined-footer">
+            <span class="processing-time"></span>
+        </div>
+        <div class="streamlined-evaluation">
+            <button class="eval-btn bad" data-quality="bad">Bad</button>
+            <button class="eval-btn ok" data-quality="ok">OK</button>
+            <button class="eval-btn good" data-quality="good">Good</button>
+        </div>
         </div>
     </template>
 
