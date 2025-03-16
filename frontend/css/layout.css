@@ -1,0 +1,119 @@
+/* Layout Styles */
+
+/* Main container */
+.container {
+    display: flex;
+    min-height: calc(100vh - 120px);
+}
+
+/* Header */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 300px;
+    background-color: var(--card-bg);
+    padding: 1rem;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+.sidebar section {
+    margin-bottom: 2rem;
+}
+
+.sidebar h2 {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+/* Content Area */
+.content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+/* Views */
+.view {
+    display: none;
+}
+
+.view.active-view {
+    display: block;
+}
+
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* Input Sets View Layout */
+.input-sets-container {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.input-sets-list {
+    flex: 1;
+    max-width: 300px;
+}
+
+.input-set-detail {
+    flex: 2;
+}
+
+/* Batch control groups layout */
+.selected-items {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.selected-models,
+.selected-prompts {
+    flex: 1;
+}
+
+/* Comparison results grid */
+.output-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Batch results grid layout */
+.batch-result-cells {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+/* History outputs grid */
+.history-outputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Add this to layout.css */
+
+/* Adds proper vertical spacing between control sections and results */
+.comparison-controls,
+.history-filters,
+.batch-controls {
+    margin-bottom: 1.5rem;
+}
+
+/* Add more specific spacing for batch controls */
+.batch-results-container {
+    margin-top: 1.5rem;
+}

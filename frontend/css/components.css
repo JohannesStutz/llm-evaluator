@@ -1,0 +1,268 @@
+/* Component Styles */
+
+/* Buttons (extended from base.css) */
+.eval-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    color: white;
+    border-radius: 4px;
+}
+
+.eval-btn.bad {
+    background-color: var(--error-color);
+}
+
+.eval-btn.ok {
+    background-color: var(--ok-color);
+}
+
+.eval-btn.good {
+    background-color: var(--success-color);
+}
+
+.eval-btn.selected {
+    outline: 3px solid rgba(0, 0, 0, 0.2);
+}
+
+.view-prompt-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.view-prompt-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.sort-btn {
+    padding: 0.5rem;
+    width: 36px;
+    height: 36px;
+}
+
+.sort-asc, .sort-desc {
+    font-weight: bold;
+}
+
+.sort-desc {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    text-align: right;
+    margin-top: 1.5rem;
+}
+
+/* Selects & Dropdowns */
+select {
+    appearance: none;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    width: auto;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+select:hover {
+    border-color: var(--secondary-color);
+}
+
+select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+}
+
+select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--light-bg);
+}
+
+/* Cards and Containers */
+.input-item, .input-sets-list, .input-set-detail,
+.comparison-controls, .comparison-results,
+.history-filters, .history-results,
+.batch-controls, .batch-results-container,
+.prompt-editor {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    padding: 1rem;
+}
+
+/* List Items */
+.input-set-item, .model-item, .prompt-item, .input-item {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.input-set-item:hover, .model-item:hover, .prompt-item:hover {
+    background-color: var(--light-bg);
+}
+
+.input-set-item.active {
+    background-color: var(--light-bg);
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Result Component */
+.result-component {
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.result-header, .output-header, .cell-header {
+    background-color: var(--light-bg);
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.result-body, .output-content, .cell-content {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 150px;
+    max-height: 300px;
+}
+
+.result-footer, .evaluation-controls {
+    border-top: 1px solid var(--border-color);
+    background-color: var(--light-bg);
+    padding: 0.75rem;
+}
+
+/* Help and Info */
+.field-help, .prompt-info {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--light-text);
+    font-style: italic;
+}
+
+/* Loading and Empty States */
+.loading, .no-results, .no-inputs, .empty-selection {
+    padding: 1rem;
+    text-align: center;
+    color: var(--light-text);
+}
+
+/* Variable tags */
+.variable-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    cursor: pointer;
+}
+
+/* Add this to components.css */
+
+.edit-prompt, .delete-prompt {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.edit-prompt {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.delete-prompt {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.prompt-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Add or update this in components.css */
+
+.prompt-item {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prompt-item label {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.prompt-item .prompt-checkbox {
+    margin-right: 0.5rem;
+}
+
+.prompt-item .prompt-name {
+    flex: 1;
+    /* Prevent long prompt names from pushing the edit button off screen */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.prompt-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+}

@@ -1,0 +1,70 @@
+/* Base Styles and Variables */
+:root {
+    --primary-color: #4a6fa5;
+    --primary-hover: #3a5a80;
+    --secondary-color: #6d8cb0;
+    --accent-color: #f0c674;
+    --text-color: #333;
+    --light-text: #666;
+    --border-color: #ddd;
+    --light-bg: #f5f7fa;
+    --card-bg: #fff;
+    --success-color: #5cb85c;
+    --ok-color: #f0ad4e;
+    --error-color: #d9534f;
+    --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Base typography */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--light-bg);
+}
+
+h1, h2, h3, h4 {
+    margin-bottom: 0.5rem;
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+/* Basic button styles - more detailed in components.css */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn.primary {
+    background-color: var(--primary-color);
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-hover);
+}

@@ -1,0 +1,86 @@
+/* Responsive Design */
+
+@media screen and (max-width: 992px) {
+    /* Layouts */
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .input-sets-container {
+        flex-direction: column;
+    }
+
+    .input-sets-list {
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    /* Control groups */
+    .comparison-controls,
+    .history-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+    }
+    
+    /* Batch evaluations */
+    .selected-items {
+        flex-direction: column;
+    }
+
+    .batch-results-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .batch-filter {
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    .batch-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    /* Prompt editor */
+    .prompt-editor-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .prompt-version-controls {
+        margin-top: 1rem;
+    }
+
+    /* Result grids */
+    .output-grid,
+    .history-outputs {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Result components */
+    .result-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .result-actions {
+        margin-top: 0.5rem;
+    }
+
+    .view-prompt-btn {
+        width: 100%;
+    }
+}
