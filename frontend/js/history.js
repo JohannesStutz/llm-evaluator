@@ -1,4 +1,89 @@
 /**
+ * Creates a streamlined result component for the matrix view
+ * @param {object} result - The result data
+ * @param {Function} onEvaluate - Callback function when evaluation is submitted
+ * @returns {HTMLElement} - The streamlined result component element
+ */
+function createStreamlinedResultComponent(result, onEvaluate) {
+    // Get template
+    const template = document.getElementById('streamlined-result-template');
+    if (!template) {
+        console.error('Streamlined result template not found');
+        const fallback = document.createElement('div');
+        fallback.textContent = 'Template missing';
+        return fallback;
+    }
+
+    // Clone template
+    const element = template.content.cloneNode(true);
+    const container = element.querySelector('.streamlined-result');
+
+    // Set content
+    const contentElement = container.querySelector('.streamlined-content');
+    if (contentElement) {
+        contentElement.textContent = result.text || 'No output text available';
+    }
+
+    // Set processing time
+    const processingTimeElement = container.querySelector('.processing-time');
+    if (processingTimeElement && typeof result.processing_time === 'number') {
+        processingTimeElement.textContent = `${result.processing_time.toFixed(2)}s`;
+    }
+
+    // Set evaluation state if present
+    if (result.evaluation) {
+        const evalButtons = container.querySelectorAll('.eval-btn');
+        evalButtons.forEach(button => {
+            if (button.dataset.quality === result.evaluation.quality) {
+                button.classList.add('selected');
+            }
+        });
+    }
+
+    // Add data attributes for reference
+    container.dataset.outputId = result.output_id || result.id || '';
+    container.dataset.modelId = result.model_id || '';
+    container.dataset.promptId = result.prompt_id || '';
+
+    // Set up evaluation buttons
+    const evalButtons = container.querySelectorAll('.eval-btn');
+    evalButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const quality = button.dataset.quality;
+            const outputId = container.dataset.outputId;
+
+            // Reset selection on all buttons
+            evalButtons.forEach(btn => btn.classList.remove('selected'));
+
+            // Select current button
+            button.classList.add('selected');
+
+            // Call the evaluation callback if provided
+            if (typeof onEvaluate === 'function') {
+                try {
+                    await onEvaluate(outputId, quality, ''); // No notes in streamlined view
+                } catch (error) {
+                    console.error('Error in evaluation callback:', error);
+                    alert(`Error saving evaluation: ${error.message || 'Unknown error'}`);
+
+                    // Revert selection if error occurs
+                    button.classList.remove('selected');
+                    if (result.evaluation) {
+                        evalButtons.forEach(btn => {
+                            if (btn.dataset.quality === result.evaluation.quality) {
+                                btn.classList.add('selected');
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    });
+
+    return container;
+}
+
+/**
  * Enhanced History UI component with Matrix View
  */
 class HistoryUI {
