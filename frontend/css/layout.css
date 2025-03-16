@@ -104,10 +104,7 @@ header {
     gap: 1.5rem;
 }
 
-/* Add this to layout.css */
-
 /* Adds proper vertical spacing between control sections and results */
-.comparison-controls,
 .history-filters,
 .batch-controls {
     margin-bottom: 1.5rem;

@@ -21,7 +21,6 @@
                 <li><a href="#" id="nav-input-sets" class="active">Input Sets</a></li>
                 <li><a href="#" id="nav-prompt-workshop">Prompt Workshop</a></li>
                 <li><a href="#" id="nav-batch-evaluation">Batch Evaluation</a></li>
-                <li><a href="#" id="nav-comparison">Comparison</a></li>
                 <li><a href="#" id="nav-history">History</a></li>
             </ul>
         </nav>
@@ -161,6 +160,25 @@
                             </select>
                         </div>
 
+                        <div class="control-group">
+                            <div class="input-selection-toggle">
+                                <label>Input Selection:</label>
+                                <div class="toggle-buttons">
+                                    <button id="all-inputs-btn" class="btn toggle-btn active">All Inputs</button>
+                                    <button id="specific-inputs-btn" class="btn toggle-btn">Specific Inputs</button>
+                                </div>
+                            </div>
+
+                            <div id="input-selector-container" class="input-selector-container hidden">
+                                <label for="batch-inputs">Select Inputs:</label>
+                                <select id="batch-inputs" multiple size="5" disabled>
+                                    <option value="">No inputs available</option>
+                                    <!-- Inputs will be loaded here -->
+                                </select>
+                                <p class="input-selection-help">Hold Ctrl/Cmd to select multiple inputs</p>
+                            </div>
+                        </div>
+
                         <div class="selected-items">
                             <div class="selected-models">
                                 <h3>Selected Models</h3>
@@ -206,40 +224,6 @@
                             <!-- Batch results will be displayed here -->
                             <div class="no-results">Run a batch evaluation to see results</div>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Comparison View -->
-                <section id="comparison-view" class="view">
-                    <div class="view-header">
-                        <h2>Prompt Comparison</h2>
-                    </div>
-
-                    <div class="comparison-controls">
-                        <div class="filter-controls">
-                            <div class="filter-group">
-                                <label for="input-set-filter">Input Set:</label>
-                                <select id="input-set-filter">
-                                    <option value="">All Input Sets</option>
-                                    <!-- Input sets will be loaded here -->
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label for="input-filter">Input:</label>
-                                <select id="input-filter" disabled>
-                                    <option value="">All Inputs</option>
-                                    <!-- Inputs will be loaded here -->
-                                </select>
-                            </div>
-                        </div>
-
-                        <button id="run-comparison-btn" class="btn primary">Run Comparison</button>
-                    </div>
-
-                    <div class="comparison-results" id="comparison-results">
-                        <!-- Comparison results will be displayed here -->
-                        <div class="no-results">Run a comparison to see results</div>
                     </div>
                 </section>
 
@@ -335,44 +319,6 @@
                 </div>
             </div>
             <p class="input-text"></p>
-        </div>
-    </template>
-
-    <template id="comparison-result-template">
-        <div class="comparison-result">
-            <div class="input-section">
-                <h3 class="input-name"></h3>
-                <p class="input-text"></p>
-            </div>
-            <div class="output-grid">
-                <!-- Output items will be inserted here -->
-            </div>
-        </div>
-    </template>
-
-    <template id="comparison-output-template">
-        <div class="output-cell">
-            <div class="output-header">
-                <div class="output-meta">
-                    <span class="model-name"></span> +
-                    <span class="prompt-name"></span>
-                    <span class="processing-time"></span>
-                </div>
-                <div class="output-actions">
-                    <button class="view-prompt-btn">View Prompt</button>
-                </div>
-            </div>
-            <div class="output-content">
-                <p class="output-text"></p>
-            </div>
-            <div class="evaluation-controls">
-                <button class="eval-btn bad" data-quality="bad">Bad</button>
-                <button class="eval-btn ok" data-quality="ok">OK</button>
-                <button class="eval-btn good" data-quality="good">Good</button>
-                <div class="evaluation-notes">
-                    <textarea placeholder="Optional notes..."></textarea>
-                </div>
-            </div>
         </div>
     </template>
 
@@ -542,7 +488,6 @@
     <script src="js/inputSets.js"></script>
     <script src="js/promptWorkshop.js"></script>
     <script src="js/batchEvaluation.js"></script>
-    <script src="js/comparison.js"></script>
     <script src="js/history.js"></script>
     <script src="js/app.js"></script>
     <!-- Module initialization script - ensure this is loaded last -->

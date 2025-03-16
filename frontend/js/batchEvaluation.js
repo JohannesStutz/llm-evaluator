@@ -1,5 +1,5 @@
 /**
- * Batch Evaluation UI component
+ * Enhanced Batch Evaluation UI component with comparison functionality
  */
 class BatchEvaluationUI {
     constructor() {
@@ -8,6 +8,12 @@ class BatchEvaluationUI {
         this.inputSetSelect = document.getElementById('batch-input-set');
         this.selectedModelsList = document.getElementById('selected-models-list');
         this.selectedPromptsList = document.getElementById('selected-prompts-list');
+        
+        // Input selection elements (new)
+        this.allInputsBtn = document.getElementById('all-inputs-btn');
+        this.specificInputsBtn = document.getElementById('specific-inputs-btn');
+        this.inputSelectorContainer = document.getElementById('input-selector-container');
+        this.batchInputsSelect = document.getElementById('batch-inputs');
 
         // Action buttons
         this.runBatchBtn = document.getElementById('run-batch-btn');
@@ -29,11 +35,13 @@ class BatchEvaluationUI {
         this.selectedPrompts = new Map(); // Map of prompt ID -> prompt data
         this.batchResults = []; // Results from the batch evaluation
         this.isAscending = true; // Sort direction
+        this.inputSelectionMode = 'all'; // 'all' or 'specific'
+        this.currentInputSet = null; // Current input set data
 
         // Initialize
         this.setupEventListeners();
 
-        console.log("BatchEvaluationUI constructor completed");
+        console.log("Enhanced BatchEvaluationUI constructor completed");
     }
 
     /**
@@ -57,6 +65,21 @@ class BatchEvaluationUI {
     setupEventListeners() {
         // Input set select
         this.inputSetSelect.addEventListener('change', () => {
+            this.loadInputsForSet();
+            this.updateRunButtonState();
+        });
+
+        // Input selection toggle buttons (new)
+        this.allInputsBtn.addEventListener('click', () => {
+            this.setInputSelectionMode('all');
+        });
+        
+        this.specificInputsBtn.addEventListener('click', () => {
+            this.setInputSelectionMode('specific');
+        });
+        
+        // Batch inputs select (new)
+        this.batchInputsSelect.addEventListener('change', () => {
             this.updateRunButtonState();
         });
 
@@ -87,6 +110,27 @@ class BatchEvaluationUI {
 
         // We'll set up model/prompt checkbox listeners when they're created
         // This will be handled by observing the sidebar elements
+    }
+
+    /**
+     * Set the input selection mode and update UI
+     * @param {string} mode - 'all' or 'specific'
+     */
+    setInputSelectionMode(mode) {
+        this.inputSelectionMode = mode;
+        
+        // Update toggle buttons
+        if (mode === 'all') {
+            this.allInputsBtn.classList.add('active');
+            this.specificInputsBtn.classList.remove('active');
+            this.inputSelectorContainer.classList.add('hidden');
+        } else {
+            this.allInputsBtn.classList.remove('active');
+            this.specificInputsBtn.classList.add('active');
+            this.inputSelectorContainer.classList.remove('hidden');
+        }
+        
+        this.updateRunButtonState();
     }
 
     /**
@@ -179,6 +223,64 @@ class BatchEvaluationUI {
             console.error('Error loading input sets:', error);
             this.inputSetSelect.innerHTML = '<option value="">Error loading input sets</option>';
             this.inputSetSelect.disabled = false;
+        }
+    }
+
+    /**
+     * New method: Load inputs for the selected input set
+     */
+    async loadInputsForSet() {
+        const inputSetId = this.inputSetSelect.value;
+        this.batchInputsSelect.innerHTML = '<option value="">Loading...</option>';
+        this.batchInputsSelect.disabled = true;
+
+        if (!inputSetId) {
+            this.batchInputsSelect.innerHTML = '<option value="">No inputs available</option>';
+            this.batchInputsSelect.disabled = true;
+            this.currentInputSet = null;
+            return;
+        }
+
+        try {
+            // Load the full input set with all its inputs
+            const inputSet = await api.getInputSet(inputSetId);
+            this.currentInputSet = inputSet;
+            
+            if (!inputSet.inputs || inputSet.inputs.length === 0) {
+                this.batchInputsSelect.innerHTML = '<option value="">No inputs available</option>';
+                this.batchInputsSelect.disabled = true;
+                return;
+            }
+
+            // Sort inputs by ID (newest first)
+            const sortedInputs = [...inputSet.inputs].sort((a, b) => b.id - a.id);
+            
+            this.batchInputsSelect.innerHTML = '';
+            
+            sortedInputs.forEach(input => {
+                const option = document.createElement('option');
+                option.value = input.id;
+                option.textContent = input.name || `Input #${input.id}`;
+                // Show first part of text as preview in tooltip
+                const preview = input.text.substring(0, 100) + (input.text.length > 100 ? '...' : '');
+                option.title = preview;
+                this.batchInputsSelect.appendChild(option);
+            });
+            
+            this.batchInputsSelect.disabled = false;
+            
+            // By default, select all inputs
+            if (this.inputSelectionMode === 'specific') {
+                for (let i = 0; i < this.batchInputsSelect.options.length; i++) {
+                    this.batchInputsSelect.options[i].selected = true;
+                }
+            }
+            
+            console.log(`Loaded ${sortedInputs.length} inputs for input set ${inputSetId}`);
+        } catch (error) {
+            console.error('Error loading inputs for set:', error);
+            this.batchInputsSelect.innerHTML = '<option value="">Error loading inputs</option>';
+            this.batchInputsSelect.disabled = true;
         }
     }
 
@@ -328,12 +430,38 @@ class BatchEvaluationUI {
         const inputSetSelected = this.inputSetSelect.value !== '';
         const hasSelectedModels = this.selectedModels.size > 0;
         const hasSelectedPrompts = this.selectedPrompts.size > 0;
+        
+        // Check if specific inputs are selected when in specific mode
+        let hasSelectedInputs = true;
+        if (this.inputSelectionMode === 'specific') {
+            const selectedOptions = Array.from(this.batchInputsSelect.selectedOptions);
+            hasSelectedInputs = selectedOptions.length > 0;
+        }
 
-        this.runBatchBtn.disabled = !(inputSetSelected && hasSelectedModels && hasSelectedPrompts);
+        this.runBatchBtn.disabled = !(inputSetSelected && hasSelectedModels && hasSelectedPrompts && hasSelectedInputs);
     }
 
     /**
-     * Enhanced runBatchEvaluation with better debugging and input sorting
+     * Get the selected input IDs based on the current selection mode
+     * @returns {Array<number>} - Array of selected input IDs
+     */
+    getSelectedInputIds() {
+        if (!this.currentInputSet) {
+            return [];
+        }
+        
+        if (this.inputSelectionMode === 'all') {
+            // Return all input IDs in the current set
+            return this.currentInputSet.inputs.map(input => input.id);
+        } else {
+            // Return just the selected input IDs
+            return Array.from(this.batchInputsSelect.selectedOptions)
+                .map(option => parseInt(option.value));
+        }
+    }
+
+    /**
+     * Enhanced runBatchEvaluation with input selection support
      */
     async runBatchEvaluation() {
         const inputSetId = this.inputSetSelect.value;
@@ -352,48 +480,53 @@ class BatchEvaluationUI {
             alert('Please select at least one prompt');
             return;
         }
+        
+        // Get selected input IDs based on the current mode
+        const selectedInputIds = this.getSelectedInputIds();
+        
+        if (selectedInputIds.length === 0) {
+            alert('Please select at least one input');
+            return;
+        }
 
         // Show loading state
         this.runBatchBtn.disabled = true;
         ui.showLoading(this.batchResultsGrid, 'Running batch evaluation...');
 
         try {
-            // Get the input set with its inputs
-            const inputSet = await api.getInputSet(inputSetId);
-            console.log("Loaded input set:", inputSet);
-
-            if (inputSet.inputs.length === 0) {
-                ui.showNoItems(this.batchResultsGrid, 'The selected input set has no inputs');
+            // Find the selected inputs from the current input set
+            const selectedInputs = this.currentInputSet.inputs.filter(
+                input => selectedInputIds.includes(input.id)
+            );
+            
+            if (selectedInputs.length === 0) {
+                ui.showNoItems(this.batchResultsGrid, 'No matching inputs found');
                 this.runBatchBtn.disabled = false;
                 return;
             }
-
-            // Sort inputs by ID (newest first)
-            inputSet.inputs.sort((a, b) => b.id - a.id);
 
             // Prepare model and prompt IDs
             const modelIds = Array.from(this.selectedModels.keys());
             const promptIds = Array.from(this.selectedPrompts.keys());
 
-            console.log(`Starting batch processing with ${inputSet.inputs.length} inputs, ${modelIds.length} models, and ${promptIds.length} prompts`);
+            console.log(`Starting batch processing with ${selectedInputs.length} inputs, ${modelIds.length} models, and ${promptIds.length} prompts`);
 
             // Use the compare-prompts endpoint for efficient batch processing
             const results = await api.batchProcessInputs(
-                inputSet.inputs,
+                selectedInputs,
                 modelIds,
                 promptIds
             );
 
             console.log(`Received ${results.length} batch results`);
 
-            // If results are received but might have data structure issues,
-            // try to augment with data from the input set
+            // Ensure results have complete input data
             if (results.length > 0) {
                 results.forEach(result => {
-                    // If input is missing or incomplete, try to find the matching input from inputSet
+                    // If input is missing or incomplete, try to find the matching input from selectedInputs
                     const inputId = result.input_id;
                     if (inputId && (!result.input || !result.input.id)) {
-                        const matchingInput = inputSet.inputs.find(input => input.id === inputId);
+                        const matchingInput = selectedInputs.find(input => input.id === inputId);
                         if (matchingInput) {
                             console.log(`Augmenting result for input #${inputId} with data from input set`);
                             result.input = matchingInput;
@@ -402,7 +535,7 @@ class BatchEvaluationUI {
                 });
             }
 
-            // Ensure results are sorted by input ID (newest first)
+            // Sort results by input ID (newest first)
             results.sort((a, b) => {
                 const idA = a.input?.id || a.input_id || 0;
                 const idB = b.input?.id || b.input_id || 0;
@@ -669,4 +802,4 @@ class BatchEvaluationUI {
 
 // Make BatchEvaluationUI available globally
 window.BatchEvaluationUI = BatchEvaluationUI;
-console.log("BatchEvaluationUI class defined");
+console.log("Enhanced BatchEvaluationUI class defined");

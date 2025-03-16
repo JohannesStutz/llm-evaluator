@@ -133,23 +133,6 @@
     color: var(--light-text);
 }
 
-/* Comparison View */
-.comparison-result {
-    margin-bottom: 2rem;
-}
-
-.input-section {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.output-cell {
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
 /* Batch Evaluation View */
 .batch-control {
     margin-bottom: 1rem;

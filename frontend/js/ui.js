@@ -8,7 +8,6 @@ class UI {
             inputSets: document.getElementById('nav-input-sets'),
             promptWorkshop: document.getElementById('nav-prompt-workshop'),
             batchEvaluation: document.getElementById('nav-batch-evaluation'),
-            comparison: document.getElementById('nav-comparison'),
             history: document.getElementById('nav-history')
         };
 
@@ -17,7 +16,6 @@ class UI {
             inputSets: document.getElementById('input-sets-view'),
             promptWorkshop: document.getElementById('prompt-workshop-view'),
             batchEvaluation: document.getElementById('batch-evaluation-view'),
-            comparison: document.getElementById('comparison-view'),
             history: document.getElementById('history-view')
         };
 
@@ -157,9 +155,6 @@ class UI {
                 break;
             case 'batchEvaluation':
                 if (window.batchEvaluationUI) window.batchEvaluationUI.onViewActivated();
-                break;
-            case 'comparison':
-                if (window.comparisonUI) window.comparisonUI.onViewActivated();
                 break;
             case 'history':
                 if (window.historyUI) window.historyUI.onViewActivated();
