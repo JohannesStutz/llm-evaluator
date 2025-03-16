@@ -39,43 +39,6 @@ class PromptService:
 
         return db_prompt
 
-    def create_prompt_version(
-        self, db: Session, prompt_id: int, version: schemas.PromptVersionCreate
-    ) -> models.PromptVersion:
-        """Create a new version for an existing prompt"""
-        # Debug log
-        print(
-            f"Creating prompt version for prompt {prompt_id} with system_prompt: {version.system_prompt}"
-        )
-
-        # Verify the prompt exists
-        db_prompt = self.get_prompt(db, prompt_id)
-        if not db_prompt:
-            raise ValueError(f"Prompt with ID {prompt_id} not found")
-
-        # Get the next version number
-        latest_version = (
-            db.query(func.max(models.PromptVersion.version_number))
-            .filter(models.PromptVersion.prompt_id == prompt_id)
-            .scalar()
-            or 0
-        )
-
-        next_version = latest_version + 1
-
-        # Create the new version with system_prompt
-        db_version = models.PromptVersion(
-            prompt_id=prompt_id,
-            version_number=next_version,
-            template=version.template,
-            system_prompt=version.system_prompt,
-        )
-        db.add(db_version)
-        db.commit()
-        db.refresh(db_version)
-
-        return db_version
-
     def get_prompt(self, db: Session, prompt_id: int) -> Optional[models.Prompt]:
         """Get a prompt by ID"""
         return db.query(models.Prompt).filter(models.Prompt.id == prompt_id).first()
@@ -146,6 +109,11 @@ class PromptService:
         self, db: Session, prompt_id: int, version: schemas.PromptVersionCreate
     ) -> models.PromptVersion:
         """Create a new version for an existing prompt"""
+        # Debug log
+        print(
+            f"Creating prompt version for prompt {prompt_id} with system_prompt: {version.system_prompt}"
+        )
+
         # Verify the prompt exists
         db_prompt = self.get_prompt(db, prompt_id)
         if not db_prompt:
@@ -161,9 +129,12 @@ class PromptService:
 
         next_version = latest_version + 1
 
-        # Create the new version
+        # Create the new version with system_prompt
         db_version = models.PromptVersion(
-            prompt_id=prompt_id, version_number=next_version, template=version.template
+            prompt_id=prompt_id,
+            version_number=next_version,
+            template=version.template,
+            system_prompt=version.system_prompt,
         )
         db.add(db_version)
         db.commit()
