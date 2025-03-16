@@ -1298,3 +1298,55 @@ select:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Add to styles.css */
+.prompt-section {
+    margin-bottom: 1.5rem;
+}
+
+.prompt-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+#system-prompt-editor-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    resize: vertical;
+    background-color: rgba(144, 238, 144, 0.1); /* Light green background to distinguish */
+}
+
+.prompt-info {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--light-text);
+    font-style: italic;
+}
+
+.field-help {
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--light-text);
+    font-style: italic;
+}
+
+/* Style for system prompt in prompt preview modal */
+.prompt-template-display.system-prompt {
+    background-color: rgba(144, 238, 144, 0.1);
+    border-left: 3px solid #4CAF50;
+    margin-bottom: 1rem;
+}
+
+/* Add this for better spacing in the prompt preview */
+.prompt-preview h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}

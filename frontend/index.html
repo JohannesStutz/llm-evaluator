@@ -111,7 +111,19 @@
                         </div>
 
                         <div class="prompt-editor-body">
-                            <textarea id="prompt-editor-textarea" rows="12" placeholder="Enter your prompt template..." disabled></textarea>
+                            <div class="prompt-section">
+                                <label for="system-prompt-editor-textarea">System Prompt:</label>
+                                <textarea id="system-prompt-editor-textarea" rows="4" placeholder="Enter system prompt (optional)..." disabled></textarea>
+                                <div class="prompt-info">
+                                    System prompts give instructions to the LLM about how to behave.
+                                </div>
+                            </div>
+
+                            <div class="prompt-section">
+                                <label for="prompt-editor-textarea">User Prompt Template:</label>
+                                <textarea id="prompt-editor-textarea" rows="8" placeholder="Enter your prompt template..." disabled></textarea>
+                            </div>
+
                             <div class="prompt-variables">
                                 <label>Available Variables:</label>
                                 <span class="variable-tag">{{input}}</span>
@@ -468,8 +480,13 @@
                 <textarea id="new-prompt-description"></textarea>
             </div>
             <div class="form-group">
-                <label for="new-prompt-template">Template (use {{input}} as placeholder):</label>
-                <textarea id="new-prompt-template" rows="6" required></textarea>
+                <label for="new-system-prompt">System Prompt (optional):</label>
+                <textarea id="new-system-prompt" rows="4" placeholder="Instructions for how the model should behave"></textarea>
+                <div class="field-help">System prompts are especially effective with OpenAI models like GPT-4.</div>
+            </div>
+            <div class="form-group">
+                <label for="new-prompt-template">User Prompt Template (use {{input}} as placeholder):</label>
+                <textarea id="new-prompt-template" rows="6" required placeholder="This is where you add your prompt with the {{input}} variable"></textarea>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn primary">Create Prompt</button>

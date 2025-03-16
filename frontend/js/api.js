@@ -15,35 +15,35 @@ class API {
      */
     async request(endpoint, method = 'GET', data = null) {
         const url = `${this.baseUrl}${endpoint}`;
-        
+
         const options = {
             method,
             headers: {
                 'Content-Type': 'application/json'
             }
         };
-        
+
         if (data) {
             options.body = JSON.stringify(data);
         }
-        
+
         try {
             const response = await fetch(url, options);
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'An error occurred');
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('API error:', error);
             throw error;
         }
     }
-    
+
     // Input Set Methods
-    
+
     /**
      * Get all input sets
      * @returns {Promise<Array>} - List of input sets
@@ -51,7 +51,7 @@ class API {
     async getInputSets() {
         return this.request('/input-sets/');
     }
-    
+
     /**
      * Create a new input set
      * @param {string} name - Input set name
@@ -64,7 +64,7 @@ class API {
             description
         });
     }
-    
+
     /**
      * Get an input set by ID
      * @param {number} inputSetId - Input set ID
@@ -73,7 +73,7 @@ class API {
     async getInputSet(inputSetId) {
         return this.request(`/input-sets/${inputSetId}`);
     }
-    
+
     /**
      * Update an input set
      * @param {number} inputSetId - Input set ID
@@ -83,7 +83,7 @@ class API {
     async updateInputSet(inputSetId, data) {
         return this.request(`/input-sets/${inputSetId}`, 'PUT', data);
     }
-    
+
     /**
      * Delete an input set
      * @param {number} inputSetId - Input set ID
@@ -92,9 +92,9 @@ class API {
     async deleteInputSet(inputSetId) {
         return this.request(`/input-sets/${inputSetId}`, 'DELETE');
     }
-    
+
     // Input Methods
-    
+
     /**
      * Get all inputs
      * @returns {Promise<Array>} - List of inputs
@@ -102,7 +102,7 @@ class API {
     async getInputs() {
         return this.request('/inputs/');
     }
-    
+
     /**
      * Create a new input
      * @param {string} text - Input text
@@ -115,7 +115,7 @@ class API {
             name
         });
     }
-    
+
     /**
      * Add an input to an input set
      * @param {number} inputSetId - Input set ID
@@ -129,7 +129,7 @@ class API {
             name
         });
     }
-    
+
     /**
      * Get inputs in an input set
      * @param {number} inputSetId - Input set ID
@@ -138,7 +138,7 @@ class API {
     async getInputsInSet(inputSetId) {
         return this.request(`/input-sets/${inputSetId}/inputs`);
     }
-    
+
     /**
      * Get an input by ID
      * @param {number} inputId - Input ID
@@ -147,7 +147,7 @@ class API {
     async getInput(inputId) {
         return this.request(`/inputs/${inputId}`);
     }
-    
+
     /**
      * Update an input
      * @param {number} inputId - Input ID
@@ -157,7 +157,7 @@ class API {
     async updateInput(inputId, data) {
         return this.request(`/inputs/${inputId}`, 'PUT', data);
     }
-    
+
     /**
      * Delete an input
      * @param {number} inputId - Input ID
@@ -166,9 +166,9 @@ class API {
     async deleteInput(inputId) {
         return this.request(`/inputs/${inputId}`, 'DELETE');
     }
-    
+
     // Model Methods
-    
+
     /**
      * Get all models
      * @returns {Promise<Array>} - List of models
@@ -176,7 +176,7 @@ class API {
     async getModels() {
         return this.request('/models/');
     }
-    
+
     /**
      * Create a new model
      * @param {object} model - Model data
@@ -185,9 +185,9 @@ class API {
     async createModel(model) {
         return this.request('/models/', 'POST', model);
     }
-    
+
     // Prompt Methods
-    
+
     /**
      * Get all prompts
      * @returns {Promise<Array>} - List of prompts
@@ -195,22 +195,24 @@ class API {
     async getPrompts() {
         return this.request('/prompts/');
     }
-    
+
     /**
      * Create a new prompt
      * @param {string} name - Prompt name
      * @param {string} template - Prompt template
      * @param {string} description - Prompt description
+     * @param {string} systemPrompt - System prompt
      * @returns {Promise<object>} - Created prompt
      */
-    async createPrompt(name, template, description = '') {
+    async createPrompt(name, template, description = '', systemPrompt = '') {
         return this.request('/prompts/', 'POST', {
             name,
             template,
-            description
+            description,
+            system_prompt: systemPrompt
         });
     }
-    
+
     /**
      * Get a prompt by ID with its versions
      * @param {number} promptId - Prompt ID
@@ -219,7 +221,7 @@ class API {
     async getPrompt(promptId) {
         return this.request(`/prompts/${promptId}`);
     }
-    
+
     /**
      * Update a prompt
      * @param {number} promptId - Prompt ID
@@ -229,7 +231,7 @@ class API {
     async updatePrompt(promptId, data) {
         return this.request(`/prompts/${promptId}`, 'PUT', data);
     }
-    
+
     /**
      * Delete a prompt
      * @param {number} promptId - Prompt ID
@@ -238,7 +240,7 @@ class API {
     async deletePrompt(promptId) {
         return this.request(`/prompts/${promptId}`, 'DELETE');
     }
-    
+
     /**
      * Get versions of a prompt
      * @param {number} promptId - Prompt ID
@@ -247,19 +249,21 @@ class API {
     async getPromptVersions(promptId) {
         return this.request(`/prompts/${promptId}/versions`);
     }
-    
+
     /**
      * Create a new version for a prompt
      * @param {number} promptId - Prompt ID
      * @param {string} template - Prompt template
+     * @param {string} systemPrompt - System prompt
      * @returns {Promise<object>} - Created prompt version
      */
-    async createPromptVersion(promptId, template) {
+    async createPromptVersion(promptId, template, systemPrompt = '') {
         return this.request(`/prompts/${promptId}/versions`, 'POST', {
-            template
+            template,
+            system_prompt: systemPrompt
         });
     }
-    
+
     /**
      * Get a specific prompt version
      * @param {number} versionId - Prompt version ID
@@ -268,9 +272,9 @@ class API {
     async getPromptVersion(versionId) {
         return this.request(`/prompt-versions/${versionId}`);
     }
-    
+
     // Processing Methods
-    
+
     /**
      * Process a single text with selected models and prompts
      * @param {string} text - Input text
@@ -287,7 +291,7 @@ class API {
             prompt_version_ids: promptVersionIds
         });
     }
-    
+
     /**
      * Process multiple texts with selected models and prompts
      * @param {Array<string>} texts - Input texts
@@ -304,11 +308,11 @@ class API {
             prompt_version_ids: promptVersionIds
         });
     }
-    
+
     /**
      * Process multiple inputs with selected models and prompts
      * This uses the compare-prompts endpoint for efficient batch processing
-     * 
+     *
      * @param {Array<object>} inputs - Array of input objects with id property
      * @param {Array<number>} modelIds - Selected model IDs
      * @param {Array<number>} promptIds - Selected prompt IDs
@@ -318,9 +322,9 @@ class API {
     async batchProcessInputs(inputs, modelIds, promptIds, promptVersionIds = null) {
         // Extract input IDs from the input objects
         const inputIds = inputs.map(input => input.id);
-        
+
         console.log(`Batch processing ${inputIds.length} inputs with ${modelIds.length} models and ${promptIds.length} prompts`);
-        
+
         return this.request('/compare-prompts/', 'POST', {
             input_ids: inputIds,
             model_ids: modelIds,
@@ -328,7 +332,7 @@ class API {
             prompt_version_ids: promptVersionIds
         });
     }
-    
+
     /**
      * Compare multiple prompts on the same inputs
      * @param {Array<number>} inputIds - Input IDs
@@ -345,9 +349,9 @@ class API {
             prompt_version_ids: promptVersionIds
         });
     }
-    
+
     // History Methods
-    
+
     /**
      * Get historical results for a specific input
      * @param {number} inputId - Input ID
@@ -356,9 +360,9 @@ class API {
     async getInputHistory(inputId) {
         return this.request(`/inputs/${inputId}/history`);
     }
-    
+
     // Evaluation Methods
-    
+
     /**
      * Create or update an evaluation for an output
      * @param {number} outputId - Output ID
@@ -373,7 +377,7 @@ class API {
             notes
         });
     }
-    
+
     /**
      * Get all evaluations
      * @returns {Promise<Array>} - List of evaluations

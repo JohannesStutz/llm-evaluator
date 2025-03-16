@@ -12,3 +12,7 @@ uv.lock
 
 # Database
 *.db
+
+# Misc
+resources
+.DS_Store

@@ -60,7 +60,6 @@ class Prompt(Base):
     outputs = relationship("Output", back_populates="prompt")
 
 
-# New: PromptVersion model for tracking prompt iterations
 class PromptVersion(Base):
     __tablename__ = "prompt_versions"
 
@@ -68,6 +67,7 @@ class PromptVersion(Base):
     prompt_id = Column(Integer, ForeignKey("prompts.id"))
     version_number = Column(Integer)
     template = Column(Text, nullable=False)
+    system_prompt = Column(Text, nullable=True)  # New field for system prompts
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     prompt = relationship("Prompt", back_populates="versions")

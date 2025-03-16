@@ -1,5 +1,5 @@
 /**
- * Prompt Workshop UI component
+ * Prompt Workshop UI component with system prompt support
  */
 class PromptWorkshopUI {
     constructor() {
@@ -8,6 +8,7 @@ class PromptWorkshopUI {
         this.promptNameInput = document.getElementById('prompt-name-input');
         this.promptVersionSelect = document.getElementById('prompt-version-select');
         this.promptEditor = document.getElementById('prompt-editor-textarea');
+        this.systemPromptEditor = document.getElementById('system-prompt-editor-textarea'); // New system prompt editor
         this.saveStatus = document.getElementById('save-status');
 
         // Action buttons
@@ -58,8 +59,6 @@ class PromptWorkshopUI {
         // Duplicate prompt button
         this.duplicatePromptBtn.addEventListener('click', () => this.duplicateCurrentPrompt());
 
-
-
         // Save prompt button
         this.savePromptBtn.addEventListener('click', () => this.savePrompt());
 
@@ -71,10 +70,15 @@ class PromptWorkshopUI {
             this.insertVariableTag('{{input}}');
         });
 
-        // Listen for input events on the prompt editor
+        // Listen for input events on the prompt editors
         this.promptEditor.addEventListener('input', () => {
             this.isEditing = true;
-            // Show unsaved changes indicator
+            this.saveStatus.textContent = 'Unsaved changes';
+        });
+
+        // Also listen for system prompt changes
+        this.systemPromptEditor.addEventListener('input', () => {
+            this.isEditing = true;
             this.saveStatus.textContent = 'Unsaved changes';
         });
     }
@@ -142,6 +146,7 @@ class PromptWorkshopUI {
             this.promptNameInput.disabled = true;
             this.promptVersionSelect.disabled = true;
             this.promptEditor.disabled = true;
+            this.systemPromptEditor.disabled = true;
             this.savePromptBtn.disabled = true;
             this.deletePromptBtn.disabled = true;
 
@@ -149,6 +154,7 @@ class PromptWorkshopUI {
             this.promptNameInput.value = 'Loading...';
             this.promptVersionSelect.innerHTML = '<option value="">Loading...</option>';
             this.promptEditor.value = '';
+            this.systemPromptEditor.value = '';
 
             // Fetch the prompt with versions
             const prompt = await api.getPrompt(promptId);
@@ -204,15 +210,19 @@ class PromptWorkshopUI {
 
             // Set loading state
             this.promptEditor.value = 'Loading...';
+            this.systemPromptEditor.value = 'Loading...';
             this.promptEditor.disabled = true;
+            this.systemPromptEditor.disabled = true;
             this.savePromptBtn.disabled = true;
 
             // Get the version details
             const version = await api.getPromptVersion(versionId);
 
-            // Update editor
+            // Update editors
             this.promptEditor.value = version.template;
+            this.systemPromptEditor.value = version.system_prompt || '';
             this.promptEditor.disabled = false;
+            this.systemPromptEditor.disabled = false;
 
             // Enable save button
             this.savePromptBtn.disabled = false;
@@ -223,7 +233,9 @@ class PromptWorkshopUI {
         } catch (error) {
             console.error(`Error loading version ${versionId}:`, error);
             this.promptEditor.value = 'Error loading version';
+            this.systemPromptEditor.value = '';
             this.promptEditor.disabled = true;
+            this.systemPromptEditor.disabled = true;
             this.savePromptBtn.disabled = true;
         }
     }
@@ -246,6 +258,10 @@ class PromptWorkshopUI {
         this.promptEditor.value = '';
         this.promptEditor.disabled = true;
 
+        // Also clear and disable system prompt editor
+        this.systemPromptEditor.value = '';
+        this.systemPromptEditor.disabled = true;
+
         this.duplicatePromptBtn.disabled = true;
         this.savePromptBtn.disabled = true;
         this.deletePromptBtn.disabled = true;
@@ -254,8 +270,8 @@ class PromptWorkshopUI {
     }
 
     /**
-     * Show modal to create a new prompt
-     */
+    * Show modal to create a new prompt
+    */
     showNewPromptModal() {
         const content = this.createPromptTemplate.content.cloneNode(true);
 
@@ -268,18 +284,21 @@ class PromptWorkshopUI {
             const name = document.getElementById('new-prompt-name').value;
             const template = document.getElementById('new-prompt-template').value;
             const description = document.getElementById('new-prompt-description').value;
+            const systemPrompt = document.getElementById('new-system-prompt').value;
+
+            console.log("Creating new prompt with system prompt:", systemPrompt);
 
             try {
-                const prompt = await api.createPrompt(name, template, description);
+                const prompt = await api.createPrompt(name, template, description, systemPrompt);
                 ui.hideModal();
-                
+
                 // Refresh the workshop prompt list
                 this.loadPrompts();
-                
+
                 // Also refresh the sidebar prompt list
                 const prompts = await api.getPrompts();
                 ui.displayPrompts(prompts);
-                
+
                 // Load the newly created prompt
                 this.loadPrompt(prompt.id);
             } catch (error) {
@@ -301,20 +320,21 @@ class PromptWorkshopUI {
             // Get the current version
             const version = await api.getPromptVersion(this.currentVersionId);
 
-            // Create a new prompt with the same template
+            // Create a new prompt with the same template and system prompt
             const newPrompt = await api.createPrompt(
                 `${prompt.name} (Copy)`,
                 version.template,
-                prompt.description
+                prompt.description,
+                version.system_prompt
             );
 
             // Refresh the workshop prompt list
             this.loadPrompts();
-            
+
             // Also refresh the sidebar prompt list
             const prompts = await api.getPrompts();
             ui.displayPrompts(prompts);
-            
+
             // Load the newly created prompt
             this.loadPrompt(newPrompt.id);
         } catch (error) {
@@ -330,34 +350,32 @@ class PromptWorkshopUI {
         if (!this.currentPrompt) {
             return;
         }
-        
+
         const promptName = this.currentPrompt.name;
-        
+
         if (confirm(`Are you sure you want to delete the prompt "${promptName}"?`)) {
             try {
                 await api.deletePrompt(this.currentPrompt.id);
-                
+
                 // Clear the editor first
                 this.clearEditor();
-                
+
                 // Reload prompts
                 this.loadPrompts();
-                
+
                 // Also refresh the sidebar prompt list
                 const prompts = await api.getPrompts();
                 ui.displayPrompts(prompts);
-                
+
                 // Reset the prompt select to empty
                 this.promptSelect.value = '';
-                
+
                 alert(`Prompt "${promptName}" deleted successfully.`);
             } catch (error) {
                 alert(`Error deleting prompt: ${error.message || 'Unknown error'}`);
             }
         }
     }
-
-
 
     /**
      * Save the current prompt
@@ -377,11 +395,18 @@ class PromptWorkshopUI {
 
             // If we're editing a version, create a new version
             if (this.isEditing) {
-                // Create a new version
+                // Create a new version with both template and system prompt
                 const template = this.promptEditor.value;
-                console.log("Creating new version with template:", template.substring(0, 50) + "...");
+                const systemPrompt = this.systemPromptEditor.value || '';
 
-                const version = await api.createPromptVersion(this.currentPromptId, template);
+                console.log("Creating new version with template:", template.substring(0, 50) + "...");
+                console.log("System prompt:", systemPrompt ? systemPrompt.substring(0, 50) + "..." : "None");
+
+                const version = await api.createPromptVersion(
+                    this.currentPromptId,
+                    template,
+                    systemPrompt
+                );
                 console.log("New version created:", version);
 
                 // Reload the prompt

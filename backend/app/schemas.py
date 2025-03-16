@@ -80,6 +80,7 @@ class LLMModel(LLMModelBase):
 # Prompt version schemas
 class PromptVersionBase(BaseModel):
     template: str
+    system_prompt: Optional[str] = None  # Add system prompt field
 
 
 class PromptVersionCreate(PromptVersionBase):
@@ -103,6 +104,7 @@ class PromptBase(BaseModel):
 
 class PromptCreate(PromptBase):
     template: str  # Initial template for first version
+    system_prompt: Optional[str] = None  # Add system prompt field
 
 
 class PromptUpdate(BaseModel):

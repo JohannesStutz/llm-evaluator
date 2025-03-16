@@ -103,6 +103,7 @@ class EvaluationService:
                 .first()
             )
 
+    # Update process_text method to use system_prompt
     def process_text(
         self, db: Session, request: schemas.ProcessRequest
     ) -> Dict[str, Any]:
@@ -159,7 +160,10 @@ class EvaluationService:
                 # Process with the LLM service
                 try:
                     output_data = self.llm_service.process_text(
-                        db_model.name, db_prompt_version.template, request.text
+                        db_model.name,
+                        db_prompt_version.template,
+                        request.text,
+                        system_prompt=db_prompt_version.system_prompt,
                     )
 
                     # Create output record
@@ -208,6 +212,7 @@ class EvaluationService:
 
         return results
 
+    # Update compare_prompts method to use system_prompt
     def compare_prompts(
         self, db: Session, request: schemas.ComparePromptsRequest
     ) -> List[Dict[str, Any]]:
@@ -296,6 +301,7 @@ class EvaluationService:
                             "prompt_version_id": db_prompt_version.id,
                             "prompt_version_number": db_prompt_version.version_number,
                             "prompt_template": db_prompt_version.template,
+                            "system_prompt": db_prompt_version.system_prompt,  # Add system prompt
                             "model_id": model_id,
                             "model_name": db_model.name,
                             "text": existing_output.text,
@@ -307,9 +313,12 @@ class EvaluationService:
                     else:
                         # Process with the LLM service
                         try:
-                            # Process the text
+                            # Process the text with system prompt
                             output_data = self.llm_service.process_text(
-                                db_model.name, db_prompt_version.template, db_input.text
+                                db_model.name,
+                                db_prompt_version.template,
+                                db_input.text,
+                                system_prompt=db_prompt_version.system_prompt,
                             )
 
                             # Create output record
@@ -332,6 +341,7 @@ class EvaluationService:
                                 "prompt_version_id": db_prompt_version.id,
                                 "prompt_version_number": db_prompt_version.version_number,
                                 "prompt_template": db_prompt_version.template,
+                                "system_prompt": db_prompt_version.system_prompt,  # Add system prompt
                                 "model_id": model_id,
                                 "model_name": db_model.name,
                                 "text": db_output.text,

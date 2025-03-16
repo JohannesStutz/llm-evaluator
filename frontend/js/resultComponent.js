@@ -5,7 +5,7 @@ class ResultComponent {
     constructor() {
         // Template for the result component
         this.template = document.getElementById('result-component-template');
-        
+
         // Event handlers registry - to clean up event listeners when removing components
         this.eventHandlers = new Map();
     }
@@ -20,18 +20,18 @@ class ResultComponent {
         // Clone the template
         const resultElement = this.template.content.cloneNode(true);
         const container = resultElement.querySelector('.result-component');
-        
+
         // Set result data with fallbacks for when data might be missing
         this.populateResultData(container, result);
-        
+
         // Set up event listeners
         this.setupEventListeners(container, result, onEvaluate);
-        
+
         return container;
     }
 
     /**
-     * Populate the result element with data
+     * Populate the result element with data - with system prompt support
      * @param {HTMLElement} element - The result element
      * @param {object} result - The result data
      */
@@ -40,13 +40,13 @@ class ResultComponent {
         element.dataset.resultId = result.output_id || result.id || '';
         element.dataset.modelId = result.model_id || '';
         element.dataset.promptId = result.prompt_id || '';
-        
+
         // Set model name
         const modelNameElement = element.querySelector('.model-name');
         if (modelNameElement) {
             modelNameElement.textContent = result.model_name || 'Unknown model';
         }
-        
+
         // Set prompt name and version
         const promptNameElement = element.querySelector('.prompt-name');
         if (promptNameElement) {
@@ -56,14 +56,14 @@ class ResultComponent {
             }
             promptNameElement.textContent = promptText;
         }
-        
+
         // Set timestamp
         const timestampElement = element.querySelector('.result-timestamp');
         if (timestampElement) {
             const timestamp = result.created_at ? new Date(result.created_at) : new Date();
             timestampElement.textContent = timestamp.toLocaleString();
         }
-        
+
         // Set processing time
         const processingTimeElement = element.querySelector('.processing-time');
         if (processingTimeElement) {
@@ -71,25 +71,29 @@ class ResultComponent {
                 result.processing_time.toFixed(2) : '?';
             processingTimeElement.textContent = `Processing: ${processingTime}s`;
         }
-        
+
         // Set output text
         const outputTextElement = element.querySelector('.result-content');
         if (outputTextElement) {
             outputTextElement.textContent = result.text || 'No output text available';
         }
-        
+
         // Set prompt template button state
         const viewPromptBtn = element.querySelector('.view-prompt-btn');
         if (viewPromptBtn) {
             if (result.prompt_template) {
                 // Store the template on the button
                 viewPromptBtn.dataset.template = result.prompt_template;
+                // Also store system prompt if present
+                if (result.system_prompt) {
+                    viewPromptBtn.dataset.systemPrompt = result.system_prompt;
+                }
             } else {
                 viewPromptBtn.disabled = true;
                 viewPromptBtn.textContent = 'No template';
             }
         }
-        
+
         // Set evaluation state if present
         if (result.evaluation) {
             const evalButtons = element.querySelectorAll('.eval-btn');
@@ -98,7 +102,7 @@ class ResultComponent {
                     button.classList.add('selected');
                 }
             });
-            
+
             // Set notes if present
             const notesTextarea = element.querySelector('.evaluation-notes textarea');
             if (notesTextarea && result.evaluation.notes) {
@@ -117,13 +121,18 @@ class ResultComponent {
         // View prompt button
         const viewPromptBtn = element.querySelector('.view-prompt-btn');
         if (viewPromptBtn && viewPromptBtn.dataset.template) {
-            const viewPromptHandler = () => this.showPromptModal(viewPromptBtn.dataset.template);
+            const viewPromptHandler = () => {
+                this.showPromptModal(
+                    viewPromptBtn.dataset.template,
+                    viewPromptBtn.dataset.systemPrompt || null
+                );
+            };
             viewPromptBtn.addEventListener('click', viewPromptHandler);
-            
+
             // Store the handler for potential cleanup
             this.eventHandlers.set(viewPromptBtn, viewPromptHandler);
         }
-        
+
         // Evaluation buttons
         const evalButtons = element.querySelectorAll('.eval-btn');
         evalButtons.forEach(button => {
@@ -132,13 +141,13 @@ class ResultComponent {
                 const outputId = element.dataset.resultId;
                 const notesTextarea = element.querySelector('.evaluation-notes textarea');
                 const notes = notesTextarea ? notesTextarea.value : '';
-                
+
                 // Reset selection on all buttons
                 evalButtons.forEach(btn => btn.classList.remove('selected'));
-                
+
                 // Select current button
                 button.classList.add('selected');
-                
+
                 // Call the evaluation callback if provided
                 if (typeof onEvaluate === 'function') {
                     try {
@@ -146,7 +155,7 @@ class ResultComponent {
                     } catch (error) {
                         console.error('Error in evaluation callback:', error);
                         alert(`Error saving evaluation: ${error.message || 'Unknown error'}`);
-                        
+
                         // Revert selection if error occurs
                         button.classList.remove('selected');
                         if (result.evaluation) {
@@ -159,9 +168,9 @@ class ResultComponent {
                     }
                 }
             };
-            
+
             button.addEventListener('click', evalHandler);
-            
+
             // Store the handler for potential cleanup
             this.eventHandlers.set(button, evalHandler);
         });
@@ -178,7 +187,7 @@ class ResultComponent {
             viewPromptBtn.removeEventListener('click', this.eventHandlers.get(viewPromptBtn));
             this.eventHandlers.delete(viewPromptBtn);
         }
-        
+
         // Evaluation buttons
         const evalButtons = element.querySelectorAll('.eval-btn');
         evalButtons.forEach(button => {
@@ -197,10 +206,10 @@ class ResultComponent {
     update(element, result) {
         // Remove old event listeners
         this.removeEventListeners(element);
-        
+
         // Update the element data
         this.populateResultData(element, result);
-        
+
         // Set up new event listeners
         this.setupEventListeners(element, result);
     }
@@ -208,23 +217,37 @@ class ResultComponent {
     /**
      * Show a modal with the prompt template
      * @param {string} template - Prompt template
+     * @param {string|null} systemPrompt - System prompt (optional)
      */
-    showPromptModal(template) {
+    showPromptModal(template, systemPrompt) {
         // Create modal content
         const content = document.createElement('div');
-        content.innerHTML = `
-            <div class="prompt-preview">
-                <h3>Prompt Template</h3>
-                <pre class="prompt-template-display">${template}</pre>
-            </div>
-        `;
-        
+
+        // Add system prompt if available
+        if (systemPrompt) {
+            content.innerHTML = `
+                <div class="prompt-preview">
+                    <h3>System Prompt</h3>
+                    <pre class="prompt-template-display system-prompt">${systemPrompt}</pre>
+                    <h3>User Prompt Template</h3>
+                    <pre class="prompt-template-display">${template}</pre>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="prompt-preview">
+                    <h3>Prompt Template</h3>
+                    <pre class="prompt-template-display">${template}</pre>
+                </div>
+            `;
+        }
+
         // Show modal using UI helper
         if (window.ui && typeof window.ui.showModal === 'function') {
             window.ui.showModal('Prompt Template', content);
         } else {
             // Fallback if ui.showModal is not available
-            alert('Prompt Template:\n\n' + template);
+            alert('Prompt Template:\n\n' + (systemPrompt ? `System: ${systemPrompt}\n\nUser: ` : '') + template);
         }
     }
 
@@ -239,7 +262,7 @@ class ResultComponent {
         if (!outputId) {
             throw new Error('Cannot save evaluation: Output ID is missing');
         }
-        
+
         // Call the API to save the evaluation
         if (window.api && typeof window.api.createEvaluation === 'function') {
             return window.api.createEvaluation(outputId, quality, notes);
