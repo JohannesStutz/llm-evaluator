@@ -21,6 +21,7 @@ class HistoryUI {
         this.historyResultTemplate = document.getElementById('history-result-template');
         this.comparisonOutputTemplate = document.getElementById('comparison-output-template');
         this.matrixTemplate = document.getElementById('matrix-view-template');
+        this.streamlinedResultTemplate = document.getElementById('streamlined-result-template');
 
         // State
         this.viewMode = 'matrix'; // 'timeline' or 'matrix'
@@ -448,7 +449,7 @@ class HistoryUI {
     }
 
     /**
-     * Display history in matrix view (new implementation)
+     * Display history in matrix view (new implementation with streamlined components)
      * @param {object} history - History data
      */
     displayMatrixView(history) {
@@ -527,11 +528,77 @@ class HistoryUI {
         const headerRow = matrixElement.querySelector('.matrix-header-row');
         const tableBody = matrixElement.querySelector('.matrix-body');
 
-        // Add prompt headers to the matrix
+        // Add prompt headers to the matrix with version indicators
         promptIds.forEach(promptId => {
             const th = document.createElement('th');
             th.className = 'matrix-prompt-header';
-            th.textContent = prompts.get(promptId);
+
+            // Find all versions for this prompt
+            const versions = new Set();
+            Object.values(resultsByModelPrompt).flat().forEach(result => {
+                if (result.prompt_id == promptId && result.prompt_version_number) {
+                    versions.add(result.prompt_version_number);
+                }
+            });
+
+            // Create a header with prompt name and version dropdown if multiple versions exist
+            const promptName = prompts.get(promptId);
+            if (versions.size > 1) {
+                const sortedVersions = Array.from(versions).sort((a, b) => b - a); // Newest first
+
+                // Create header content with version dropdown
+                const headerContent = document.createElement('div');
+                headerContent.className = 'header-content';
+                headerContent.innerHTML = `
+                    <span class="prompt-name">${promptName}</span>
+                    <button class="view-prompt-btn" title="View prompt template">🔍</button>
+                `;
+
+                // Find the first result with this prompt to get the template
+                const sampleResult = Object.values(resultsByModelPrompt).flat().find(r => r.prompt_id == promptId);
+                if (sampleResult && sampleResult.prompt_template) {
+                    headerContent.querySelector('.view-prompt-btn').addEventListener('click', () => {
+                        this.showPromptModal(
+                            sampleResult.prompt_template,
+                            sampleResult.system_prompt || null
+                        );
+                    });
+                } else {
+                    headerContent.querySelector('.view-prompt-btn').style.display = 'none';
+                }
+
+                th.appendChild(headerContent);
+            } else {
+                // Simple header for single version
+                const version = versions.size === 1 ? Array.from(versions)[0] : '';
+
+                // Create header content
+                const headerContent = document.createElement('div');
+                headerContent.className = 'header-content';
+                headerContent.innerHTML = `
+                    <div>
+                        <span class="prompt-name">${promptName}</span>
+                        ${version ? `<span class="prompt-version">v${version}</span>` : ''}
+                    </div>
+                    <button class="view-prompt-btn" title="View prompt template">🔍</button>
+                `;
+
+                // Find the first result with this prompt to get the template
+                const sampleResult = Object.values(resultsByModelPrompt).flat().find(r => r.prompt_id == promptId);
+                if (sampleResult && sampleResult.prompt_template) {
+                    headerContent.querySelector('.view-prompt-btn').addEventListener('click', () => {
+                        this.showPromptModal(
+                            sampleResult.prompt_template,
+                            sampleResult.system_prompt || null
+                        );
+                    });
+                } else {
+                    headerContent.querySelector('.view-prompt-btn').style.display = 'none';
+                }
+
+                th.appendChild(headerContent);
+            }
+
             headerRow.appendChild(th);
         });
 
@@ -555,18 +622,12 @@ class HistoryUI {
                 if (results && results.length > 0) {
                     const latestResult = results[0]; // Get the most recent result
 
-                    // Create wrapper for result component
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'matrix-result-wrapper';
-
                     // Create the evaluation callback
                     const onEvaluate = async (outputId, quality, notes) => {
                         try {
                             await ResultComponent.saveEvaluation(outputId, quality, notes);
                             // Update the result in memory
                             latestResult.evaluation = { quality, notes };
-                            // Show success message
-                            alert('Evaluation saved');
                             return true;
                         } catch (error) {
                             console.error('Error saving evaluation:', error);
@@ -574,8 +635,10 @@ class HistoryUI {
                         }
                     };
 
-                    // Create result component for latest result
-                    const resultElement = window.resultComponent.create(latestResult, onEvaluate);
+                    // Create streamlined result component
+                    const resultElement = createStreamlinedResultComponent(latestResult, onEvaluate);
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'matrix-result-wrapper';
                     wrapper.appendChild(resultElement);
 
                     // Add history count indicator if there are multiple versions
@@ -583,9 +646,12 @@ class HistoryUI {
                         const historyIndicator = document.createElement('div');
                         historyIndicator.className = 'history-indicator';
                         historyIndicator.innerHTML = `<span>${results.length} versions</span>`;
+
+                        // Implement the version history modal
                         historyIndicator.addEventListener('click', () => {
                             this.showHistoryModal(results, models.get(modelId), prompts.get(promptId));
                         });
+
                         wrapper.appendChild(historyIndicator);
                     }
 
@@ -638,15 +704,50 @@ class HistoryUI {
             const timestamp = new Date(result.created_at).toLocaleString();
             const header = document.createElement('div');
             header.className = 'history-result-header';
-            header.innerHTML = `<strong>Version ${index + 1}</strong> - ${timestamp}`;
+
+            // Add version and version number if available
+            const versionNumber = result.prompt_version_number ?
+                `(v${result.prompt_version_number})` : '';
+            header.innerHTML = `<strong>Version ${index + 1}</strong> ${versionNumber} - ${timestamp}`;
             if (index === 0) {
                 header.innerHTML += ' <span class="latest-badge">Latest</span>';
             }
             resultContainer.appendChild(header);
 
-            // Create streamlined result component
-            const resultElement = this.createStreamlinedResultCell(result);
+            // Create the evaluation callback for this modal result
+            const onEvaluate = async (outputId, quality, notes) => {
+                try {
+                    await ResultComponent.saveEvaluation(outputId, quality, notes);
+                    // Update the result in memory
+                    result.evaluation = { quality, notes };
+                    return true;
+                } catch (error) {
+                    console.error('Error saving evaluation:', error);
+                    throw error;
+                }
+            };
+
+            // Create streamlined result component for this version
+            const resultElement = createStreamlinedResultComponent(result, onEvaluate);
             resultContainer.appendChild(resultElement);
+
+            // Add "View Prompt" button if template is available
+            if (result.prompt_template) {
+                const viewPromptBtn = document.createElement('button');
+                viewPromptBtn.className = 'view-prompt-btn';
+                viewPromptBtn.textContent = 'View Prompt';
+                viewPromptBtn.addEventListener('click', () => {
+                    this.showPromptModal(
+                        result.prompt_template,
+                        result.system_prompt || null
+                    );
+                });
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'modal-result-actions';
+                buttonContainer.appendChild(viewPromptBtn);
+                resultContainer.appendChild(buttonContainer);
+            }
 
             content.appendChild(resultContainer);
         });
