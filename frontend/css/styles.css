@@ -1107,3 +1107,194 @@ select:disabled {
     width: 100%;
     padding: 0.75rem 2rem 0.75rem 0.75rem;
 }
+
+/* Result Component Styles */
+.result-component {
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.result-header {
+    background-color: var(--light-bg);
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.result-meta {
+    flex: 1;
+    min-width: 200px;
+}
+
+.result-source {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.result-timing {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: var(--light-text);
+}
+
+.result-timestamp {
+    margin-bottom: 0.25rem;
+}
+
+.processing-time {
+    font-style: italic;
+}
+
+.result-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-prompt-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+}
+
+.result-body {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 150px;
+    max-height: 300px;
+}
+
+.result-content {
+    white-space: pre-line;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.result-footer {
+    border-top: 1px solid var(--border-color);
+    background-color: var(--light-bg);
+    padding: 0.75rem;
+}
+
+.evaluation-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.eval-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.eval-btn {
+    flex: 1;
+    padding: 0.5rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.eval-btn:hover {
+    opacity: 0.9;
+}
+
+.eval-btn.bad {
+    background-color: var(--error-color);
+}
+
+.eval-btn.ok {
+    background-color: var(--ok-color);
+}
+
+.eval-btn.good {
+    background-color: var(--success-color);
+}
+
+.eval-btn.selected {
+    outline: 3px solid rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+.evaluation-notes {
+    width: 100%;
+}
+
+.evaluation-notes textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: vertical;
+    height: 60px;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+/* Prompt template modal styles */
+.prompt-preview {
+    padding: 0.5rem;
+}
+
+.prompt-template-display {
+    white-space: pre-wrap;
+    background-color: var(--light-bg);
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    font-family: monospace;
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .result-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .result-actions {
+        margin-top: 0.5rem;
+    }
+
+    .view-prompt-btn {
+        width: 100%;
+    }
+}
+
+/* Add this to the result-component styles to ensure button consistency */
+.result-component .view-prompt-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.result-component .view-prompt-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.result-component .view-prompt-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

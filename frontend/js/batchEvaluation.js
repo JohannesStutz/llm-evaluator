@@ -333,7 +333,7 @@ class BatchEvaluationUI {
     }
 
     /**
-     * Enhanced runBatchEvaluation with better debugging
+     * Enhanced runBatchEvaluation with better debugging and input sorting
      */
     async runBatchEvaluation() {
         const inputSetId = this.inputSetSelect.value;
@@ -368,6 +368,9 @@ class BatchEvaluationUI {
                 return;
             }
 
+            // Sort inputs by ID (newest first)
+            inputSet.inputs.sort((a, b) => b.id - a.id);
+
             // Prepare model and prompt IDs
             const modelIds = Array.from(this.selectedModels.keys());
             const promptIds = Array.from(this.selectedPrompts.keys());
@@ -399,6 +402,13 @@ class BatchEvaluationUI {
                 });
             }
 
+            // Ensure results are sorted by input ID (newest first)
+            results.sort((a, b) => {
+                const idA = a.input?.id || a.input_id || 0;
+                const idB = b.input?.id || b.input_id || 0;
+                return idB - idA;
+            });
+
             // Store the results
             this.batchResults = results;
 
@@ -418,8 +428,8 @@ class BatchEvaluationUI {
     }
 
     /**
-     * More robust displayBatchResults() function for BatchEvaluationUI class
-     * This version handles different data structures between stored and fresh LLM results
+     * Modified displayBatchResults() method for BatchEvaluationUI class
+     * This version uses the shared ResultComponent
      */
     displayBatchResults() {
         this.batchResultsGrid.innerHTML = '';
@@ -461,86 +471,33 @@ class BatchEvaluationUI {
             // Create a cell for each prompt result (model+prompt combination)
             if (inputResult.prompt_results && inputResult.prompt_results.length > 0) {
                 inputResult.prompt_results.forEach(result => {
-                    const cellItem = this.batchResultCellTemplate.content.cloneNode(true);
-                    const cellContainer = cellItem.querySelector('.batch-result-cell');
-                    const modelNameElement = cellItem.querySelector('.model-name');
-                    const promptNameElement = cellItem.querySelector('.prompt-name');
-                    const timestampElement = cellItem.querySelector('.cell-timestamp');
-                    const processingTimeElement = cellItem.querySelector('.processing-time');
-                    const outputTextElement = cellItem.querySelector('.output-text');
-                    const viewPromptBtn = cellItem.querySelector('.view-prompt-btn');
-                    const evalButtons = cellItem.querySelectorAll('.eval-btn');
+                    // Create a wrapper element for the result component
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'result-component-wrapper';
 
-                    // Set cell data with fallbacks for each property
-                    cellContainer.dataset.outputId = result.output_id || "";
-                    cellContainer.dataset.modelId = result.model_id || "";
-                    cellContainer.dataset.promptId = result.prompt_id || "";
-                    modelNameElement.textContent = result.model_name || "Unknown model";
-                    promptNameElement.textContent = result.prompt_name || "Unknown prompt";
-
-                    // Add version number if available
-                    if (result.prompt_version_number) {
-                        promptNameElement.textContent += ` (v${result.prompt_version_number})`;
-                    }
-
-                    // Format timestamp with fallback
-                    const timestamp = result.created_at ? new Date(result.created_at) : new Date();
-                    timestampElement.textContent = timestamp.toLocaleString();
-
-                    // Processing time with fallback
-                    const processingTime = typeof result.processing_time === 'number' ?
-                                        result.processing_time.toFixed(2) : "?";
-                    processingTimeElement.textContent = `Processing: ${processingTime}s`;
-
-                    // Output text with fallback
-                    outputTextElement.textContent = result.text || "No output text available";
-
-                    // Make the view prompt button conditional on having a template
-                    if (result.prompt_template) {
-                        viewPromptBtn.addEventListener('click', () => {
-                            this.showPromptModal(result.prompt_template);
-                        });
-                    } else {
-                        viewPromptBtn.disabled = true;
-                        viewPromptBtn.textContent = "No template";
-                    }
-
-                    // Set up evaluation buttons
-                    evalButtons.forEach(button => {
-                        // If there's already an evaluation, select the corresponding button
-                        if (result.evaluation && result.evaluation.quality === button.dataset.quality) {
-                            button.classList.add('selected');
+                    // Use the shared ResultComponent to create the result display
+                    const onEvaluate = async (outputId, quality, notes) => {
+                        try {
+                            await ResultComponent.saveEvaluation(outputId, quality, notes);
+                            // Update the result in memory
+                            result.evaluation = { quality, notes };
+                            // Show success message
+                            alert('Evaluation saved');
+                            return true;
+                        } catch (error) {
+                            console.error('Error saving evaluation:', error);
+                            throw error;
                         }
+                    };
 
-                        button.addEventListener('click', async () => {
-                            const quality = button.dataset.quality;
+                    // Create the result component
+                    const resultElement = window.resultComponent.create(result, onEvaluate);
 
-                            try {
-                                if (!result.output_id) {
-                                    throw new Error("Cannot evaluate: output_id is missing");
-                                }
+                    // Add the result component to the wrapper
+                    wrapper.appendChild(resultElement);
 
-                                await api.createEvaluation(result.output_id, quality);
-
-                                // Reset all buttons in this cell
-                                evalButtons.forEach(btn => btn.classList.remove('selected'));
-
-                                // Select current button
-                                button.classList.add('selected');
-
-                                // Update the result in memory
-                                result.evaluation = { quality };
-
-                                // Show success message
-                                alert('Evaluation saved');
-                            } catch (error) {
-                                console.error('Error saving evaluation:', error);
-                                alert(`Error saving evaluation: ${error.message}`);
-                            }
-                        });
-                    });
-
-                    resultCellsContainer.appendChild(cellItem);
+                    // Add the wrapper to the container
+                    resultCellsContainer.appendChild(wrapper);
                 });
             } else {
                 // No results for this input

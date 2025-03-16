@@ -477,9 +477,45 @@
         </form>
     </template>
 
+    <template id="result-component-template">
+        <div class="result-component">
+            <div class="result-header">
+                <div class="result-meta">
+                    <div class="result-source">
+                        <span class="model-name"></span> +
+                        <span class="prompt-name"></span>
+                    </div>
+                    <div class="result-timing">
+                        <div class="result-timestamp"></div>
+                        <div class="processing-time"></div>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button class="view-prompt-btn btn">View Prompt</button>
+                </div>
+            </div>
+            <div class="result-body">
+                <div class="result-content"></div>
+            </div>
+            <div class="result-footer">
+                <div class="evaluation-controls">
+                    <div class="eval-buttons">
+                        <button class="eval-btn bad" data-quality="bad">Bad</button>
+                        <button class="eval-btn ok" data-quality="ok">OK</button>
+                        <button class="eval-btn good" data-quality="good">Good</button>
+                    </div>
+                    <div class="evaluation-notes">
+                        <textarea placeholder="Optional evaluation notes..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- Scripts -->
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/resultComponent.js"></script>
     <script src="js/inputSets.js"></script>
     <script src="js/promptWorkshop.js"></script>
     <script src="js/batchEvaluation.js"></script>
